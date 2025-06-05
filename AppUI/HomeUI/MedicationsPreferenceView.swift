@@ -5,21 +5,25 @@
 //  Created by Ella A. Sadduq on 5/31/25.
 //
 
-
 //
 //  MedicationsPreferenceView.swift
 //  AppUI
 //
-//  Medications preference management interface
+//  Minimalist medications preference management interface
 //
 
 import SwiftUI
 
 struct MedicationsPreferenceView: View {
-    @State private var selectedOption: String = "Yes" // Pre-selected for demo
+    @State private var selectedMedications: Set<Int> = [0] // Pre-selected medications for demo
     @State private var animateContent = false
     @State private var hasChanges = false
-    @State private var originalOption: String = "Yes" // Track original state
+    @State private var originalMedications: Set<Int> = [0] // Track original state
+    
+    let medicationTitles = [
+        "yes",
+        "no"
+    ]
     
     var body: some View {
         ZStack {
@@ -37,9 +41,9 @@ struct MedicationsPreferenceView: View {
             
             VStack(spacing: 0) {
                 headerSection
-                currentStatusSection
+                currentMedicationsSection
                 Spacer()
-                optionsSection
+                availableMedicationsSection
                 Spacer()
                 bottomSection
             }
@@ -67,7 +71,7 @@ struct MedicationsPreferenceView: View {
             .padding(.top, 60)
             .padding(.bottom, 40)
             
-            // Title and subtitle
+            // Title
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     Text("Medications")
@@ -82,13 +86,6 @@ struct MedicationsPreferenceView: View {
                 }
                 
                 HStack {
-                    Text("update your medication status")
-                        .font(.system(size: 16, weight: .light))
-                        .foregroundColor(Color(red: 0.4, green: 0.4, blue: 0.45))
-                        .opacity(animateContent ? 1.0 : 0.0)
-                        .offset(y: animateContent ? 0 : 20)
-                        .animation(.easeOut(duration: 0.8).delay(0.4), value: animateContent)
-                    
                     Spacer()
                 }
             }
@@ -97,126 +94,87 @@ struct MedicationsPreferenceView: View {
         }
     }
     
-    // MARK: - Current Status Section
-    private var currentStatusSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
+    // MARK: - Current Medications Section
+    private var currentMedicationsSection: some View {
+        VStack(alignment: .leading, spacing: 20) {
             HStack {
-                Text("Current Status")
+                Text("Current")
                     .font(.system(size: 18, weight: .medium))
                     .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
                 
                 Spacer()
             }
+            .padding(.horizontal, 30)
             .opacity(animateContent ? 1.0 : 0.0)
             .offset(y: animateContent ? 0 : 20)
             .animation(.easeOut(duration: 0.8).delay(0.6), value: animateContent)
             
-            currentStatusItemView()
-                .opacity(animateContent ? 1.0 : 0.0)
-                .offset(y: animateContent ? 0 : 20)
-                .animation(.easeOut(duration: 0.8).delay(0.8), value: animateContent)
+            VStack(alignment: .leading, spacing: 16) {
+                ForEach(Array(selectedMedications.sorted()), id: \.self) { medicationIndex in
+                    Button(action: {
+                        toggleMedication(index: medicationIndex)
+                    }) {
+                        HStack {
+                            Text(medicationTitles[medicationIndex])
+                                .font(.system(size: 20, weight: .light))
+                                .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
+                            
+                            Spacer()
+                            
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
+                        }
+                        .padding(.horizontal, 30)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
+            }
+            .opacity(animateContent ? 1.0 : 0.0)
+            .offset(y: animateContent ? 0 : 20)
+            .animation(.easeOut(duration: 0.8).delay(0.8), value: animateContent)
         }
-        .padding(.horizontal, 30)
         .padding(.bottom, 40)
     }
     
-    private func currentStatusItemView() -> some View {
-        HStack(spacing: 16) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Taking medications")
-                    .font(.system(size: 16, weight: .medium))
+    // MARK: - Available Medications Section
+    private var availableMedicationsSection: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            HStack {
+                Text("All Options")
+                    .font(.system(size: 18, weight: .medium))
                     .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
                 
-                Text(selectedOption == "Yes" ? "You indicated that you take medications" : "You indicated that you don't take medications")
-                    .font(.system(size: 14, weight: .light))
-                    .foregroundColor(Color(red: 0.5, green: 0.5, blue: 0.55))
+                Spacer()
             }
+            .padding(.horizontal, 30)
+            .opacity(animateContent ? 1.0 : 0.0)
+            .offset(y: animateContent ? 0 : 20)
+            .animation(.easeOut(duration: 0.8).delay(1.0), value: animateContent)
             
-            Spacer()
-            
-            Text(selectedOption)
-                .font(.system(size: 16, weight: .medium))
-                .foregroundColor(selectedOption == "Yes" ? Color(red: 0.2, green: 0.6, blue: 0.3) : Color(red: 0.6, green: 0.4, blue: 0.2))
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(selectedOption == "Yes" ? Color(red: 0.9, green: 0.98, blue: 0.9) : Color(red: 0.98, green: 0.95, blue: 0.9))
-                )
-        }
-        .padding(.vertical, 16)
-        .padding(.horizontal, 20)
-        .background(currentStatusBackground)
-    }
-    
-    private var currentStatusBackground: some View {
-        RoundedRectangle(cornerRadius: 12)
-            .fill(Color(red: 0.98, green: 0.98, blue: 0.99))
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color(red: 0.9, green: 0.9, blue: 0.92), lineWidth: 1)
-            )
-    }
-    
-    // MARK: - Options Section
-    private var optionsSection: some View {
-        VStack(spacing: 40) {
             VStack(alignment: .leading, spacing: 16) {
-                HStack {
-                    Text("Update Status")
-                        .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
-                    
-                    Spacer()
+                ForEach(0..<medicationTitles.count, id: \.self) { index in
+                    if !selectedMedications.contains(index) {
+                        Button(action: {
+                            toggleMedication(index: index)
+                        }) {
+                            HStack {
+                                Text(medicationTitles[index])
+                                    .font(.system(size: 20, weight: .ultraLight))
+                                    .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
+                                
+                                Spacer()
+                            }
+                            .padding(.horizontal, 30)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
                 }
-                .padding(.horizontal, 30)
-                .opacity(animateContent ? 1.0 : 0.0)
-                .offset(y: animateContent ? 0 : 20)
-                .animation(.easeOut(duration: 0.8).delay(1.0), value: animateContent)
-                
-                Text("Do you take medications?")
-                    .font(.system(size: 28, weight: .ultraLight))
-                    .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
-                    .tracking(-0.5)
-                    .multilineTextAlignment(.center)
-                    .opacity(animateContent ? 1.0 : 0.0)
-                    .offset(y: animateContent ? 0 : 30)
-                    .animation(.easeOut(duration: 0.8).delay(1.2), value: animateContent)
-                    .padding(.horizontal, 30)
             }
-            
-            // Clean text options
-            VStack(spacing: 40) {
-                // Yes option
-                Button(action: {
-                    selectOption("Yes")
-                }) {
-                    Text("yes")
-                        .font(.system(size: 24, weight: .light))
-                        .foregroundColor(selectedOption == "Yes" ? Color(red: 0.15, green: 0.15, blue: 0.2) : Color(red: 0.5, green: 0.5, blue: 0.55))
-                        .scaleEffect(selectedOption == "Yes" ? 1.05 : 1.0)
-                        .animation(.easeInOut(duration: 0.2), value: selectedOption)
-                }
-                .opacity(animateContent ? 1.0 : 0.0)
-                .offset(y: animateContent ? 0 : 20)
-                .animation(.easeOut(duration: 0.8).delay(1.4), value: animateContent)
-                
-                // No option
-                Button(action: {
-                    selectOption("No")
-                }) {
-                    Text("no")
-                        .font(.system(size: 24, weight: .light))
-                        .foregroundColor(selectedOption == "No" ? Color(red: 0.15, green: 0.15, blue: 0.2) : Color(red: 0.5, green: 0.5, blue: 0.55))
-                        .scaleEffect(selectedOption == "No" ? 1.05 : 1.0)
-                        .animation(.easeInOut(duration: 0.2), value: selectedOption)
-                }
-                .opacity(animateContent ? 1.0 : 0.0)
-                .offset(y: animateContent ? 0 : 20)
-                .animation(.easeOut(duration: 0.8).delay(1.6), value: animateContent)
-            }
+            .opacity(animateContent ? 1.0 : 0.0)
+            .offset(y: animateContent ? 0 : 30)
+            .animation(.easeOut(duration: 0.8).delay(1.2), value: animateContent)
         }
-        .padding(.horizontal, 40)
     }
     
     // MARK: - Bottom Section
@@ -228,7 +186,7 @@ struct MedicationsPreferenceView: View {
                     impactFeedback.impactOccurred()
                     saveChanges()
                 }) {
-                    Text("save changes")
+                    Text("save")
                         .font(.system(size: 24, weight: .light))
                         .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
                         .tracking(-0.3)
@@ -243,22 +201,25 @@ struct MedicationsPreferenceView: View {
     }
     
     // MARK: - Helper Methods
-    private func selectOption(_ option: String) {
+    private func toggleMedication(index: Int) {
         let impactFeedback = UIImpactFeedbackGenerator(style: .light)
         impactFeedback.impactOccurred()
         
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-            selectedOption = option
+            // Clear all selections first (since only one can be selected)
+            selectedMedications.removeAll()
+            // Then add the new selection
+            selectedMedications.insert(index)
             checkForChanges()
         }
     }
     
     private func checkForChanges() {
-        hasChanges = selectedOption != originalOption
+        hasChanges = selectedMedications != originalMedications
     }
     
     private func saveChanges() {
-        originalOption = selectedOption
+        originalMedications = selectedMedications
         hasChanges = false
         // Save to persistent storage here
     }
