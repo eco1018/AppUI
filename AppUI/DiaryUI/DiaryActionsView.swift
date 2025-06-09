@@ -2,10 +2,6 @@
 //  DiaryActionsView.swift
 //  AppUI
 //
-//  Created by Ella A. Sadduq on 5/31/25.
-//
-
-
 //
 //  DiaryActionsView.swift
 //  AppUI
@@ -17,10 +13,17 @@ import SwiftUI
 
 struct DiaryActionsView: View {
     @State private var animateContent = false
+    @State private var suicideAction: Bool? = nil
+    @State private var selfHarmAction: Bool? = nil
+    @State private var userAction1: Bool? = nil
+    @State private var userAction2: Bool? = nil
+    @State private var userAction3: Bool? = nil
+    
+    let fixedActions = ["suicide", "self-harm"]
+    let userActions = ["User Action 1", "User Action 2", "User Action 3"]
     
     var body: some View {
         ZStack {
-            // Clean gradient background
             LinearGradient(
                 colors: [
                     Color(red: 0.99, green: 0.99, blue: 1.0),
@@ -34,8 +37,56 @@ struct DiaryActionsView: View {
             
             VStack(spacing: 0) {
                 headerSection
-                Spacer()
-                // Content will go here later
+                
+                VStack(spacing: 16) {
+                    ActionYesNoRow(
+                        actionName: "suicide",
+                        selectedValue: $suicideAction,
+                        animationDelay: 0.6
+                    )
+                    .opacity(animateContent ? 1.0 : 0.0)
+                    .offset(y: animateContent ? 0 : 30)
+                    .animation(.easeOut(duration: 0.8).delay(0.6), value: animateContent)
+                    
+                    ActionYesNoRow(
+                        actionName: "self-harm",
+                        selectedValue: $selfHarmAction,
+                        animationDelay: 0.7
+                    )
+                    .opacity(animateContent ? 1.0 : 0.0)
+                    .offset(y: animateContent ? 0 : 30)
+                    .animation(.easeOut(duration: 0.8).delay(0.7), value: animateContent)
+                    
+                    ActionYesNoRow(
+                        actionName: userActions[0],
+                        selectedValue: $userAction1,
+                        animationDelay: 0.8
+                    )
+                    .opacity(animateContent ? 1.0 : 0.0)
+                    .offset(y: animateContent ? 0 : 30)
+                    .animation(.easeOut(duration: 0.8).delay(0.8), value: animateContent)
+                    
+                    ActionYesNoRow(
+                        actionName: userActions[1],
+                        selectedValue: $userAction2,
+                        animationDelay: 0.9
+                    )
+                    .opacity(animateContent ? 1.0 : 0.0)
+                    .offset(y: animateContent ? 0 : 30)
+                    .animation(.easeOut(duration: 0.8).delay(0.9), value: animateContent)
+                    
+                    ActionYesNoRow(
+                        actionName: userActions[2],
+                        selectedValue: $userAction3,
+                        animationDelay: 1.0
+                    )
+                    .opacity(animateContent ? 1.0 : 0.0)
+                    .offset(y: animateContent ? 0 : 30)
+                    .animation(.easeOut(duration: 0.8).delay(1.0), value: animateContent)
+                }
+                .padding(.horizontal, 30)
+                .padding(.vertical, 30)
+                
                 Spacer()
                 nextSection
             }
@@ -45,7 +96,6 @@ struct DiaryActionsView: View {
         }
     }
     
-    // MARK: - Header Section
     private var headerSection: some View {
         VStack(spacing: 0) {
             HStack {
@@ -63,7 +113,6 @@ struct DiaryActionsView: View {
             .padding(.top, 60)
             .padding(.bottom, 40)
             
-            // Title
             HStack {
                 Text("actions")
                     .font(.system(size: 42, weight: .ultraLight))
@@ -80,10 +129,8 @@ struct DiaryActionsView: View {
         }
     }
     
-    // MARK: - Next Section
     private var nextSection: some View {
         VStack {
-            // Next button - centered
             Button(action: {
                 let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
                 impactFeedback.impactOccurred()
@@ -102,11 +149,81 @@ struct DiaryActionsView: View {
         .padding(.bottom, 60)
     }
     
-    // MARK: - Helper Methods
     private func performAppearAnimations() {
         withAnimation(.easeOut(duration: 0.6)) {
             animateContent = true
         }
+    }
+}
+
+struct ActionYesNoRow: View {
+    let actionName: String
+    @Binding var selectedValue: Bool?
+    let animationDelay: Double
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            Text(actionName)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
+            
+            Spacer()
+            
+            HStack(spacing: 12) {
+                Button(action: {
+                    selectedValue = true
+                    let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                    impactFeedback.impactOccurred()
+                }) {
+                    Text("yes")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(selectedValue == true ? Color.white : Color(red: 0.15, green: 0.15, blue: 0.2))
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(selectedValue == true ? Color(red: 0.15, green: 0.15, blue: 0.2) : Color.white)
+                                .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 1)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color(red: 0.15, green: 0.15, blue: 0.2).opacity(0.1), lineWidth: 0.5)
+                        )
+                }
+                
+                Button(action: {
+                    selectedValue = false
+                    let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                    impactFeedback.impactOccurred()
+                }) {
+                    Text("no")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(selectedValue == false ? Color.white : Color(red: 0.15, green: 0.15, blue: 0.2))
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(selectedValue == false ? Color(red: 0.15, green: 0.15, blue: 0.2) : Color.white)
+                                .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 1)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color(red: 0.15, green: 0.15, blue: 0.2).opacity(0.1), lineWidth: 0.5)
+                        )
+                }
+            }
+        }
+        .padding(.vertical, 12)
+        .padding(.horizontal, 16)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white.opacity(0.9))
+                .shadow(color: .black.opacity(0.04), radius: 6, x: 0, y: 1)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color(red: 0.15, green: 0.15, blue: 0.2).opacity(0.06), lineWidth: 0.5)
+        )
     }
 }
 

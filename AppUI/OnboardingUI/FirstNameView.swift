@@ -1,9 +1,3 @@
-//
-//  FirstNameView.swift
-//  AppUI
-//
-//  Created by Ella A. Sadduq on 5/31/25.
-//
 
 //
 //  FirstNameView.swift
@@ -110,7 +104,7 @@ struct FirstNameView: View {
                     hideKeyboard()
                     // Handle continue action
                 }) {
-                    Text("continue")
+                    Text("next")
                         .font(.system(size: 24, weight: .light))
                         .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
                         .tracking(-0.3)

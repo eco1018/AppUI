@@ -275,7 +275,7 @@ struct GoalsSelectionView: View {
                     impactFeedback.impactOccurred()
                     // Handle continue action
                 }) {
-                    Text("start")
+                    Text("next")
                         .font(.system(size: 24, weight: .light))
                         .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
                         .tracking(-0.3)

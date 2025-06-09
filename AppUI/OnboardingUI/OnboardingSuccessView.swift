@@ -78,7 +78,7 @@ struct OnboardingSuccessView: View {
             // Handle continue to main app
         }) {
             HStack(spacing: 10) {
-                Text("begin")
+                Text("complete")
                     .font(.system(size: 17, weight: .medium))
                     .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
                 
