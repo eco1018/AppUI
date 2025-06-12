@@ -1,16 +1,9 @@
 //
+//
 //  DbtMedicationCheckIn.swift
 //  AppUI
 //
 //  Created by Ella A. Sadduq on 6/12/25.
-//
-
-
-//
-//  UserMedications.swift
-//  aura
-//
-//  Created by [Your Name] on [Today’s Date].
 //
 
 import Foundation
@@ -19,7 +12,7 @@ import Foundation
 struct DbtMedicationCheckIn: Codable, Hashable {
     let id: String              // Unique ID per diary entry (or "today")
     let didTakeMeds: Bool       // true = Yes, false = No
-    let inputType: InputType = .binary
+    var inputType: InputType = .binary  // Made mutable to support decoding
 
     init(id: String = UUID().uuidString, didTakeMeds: Bool) {
         self.id = id

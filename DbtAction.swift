@@ -6,13 +6,6 @@
 //
 
 
-//
-//  UserActions.swift
-//  aura
-//
-//  Created by [Your Name] on [Today’s Date].
-//
-
 import Foundation
 
 /// Represents a DBT action tracked with a Yes/No (binary) input

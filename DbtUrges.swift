@@ -8,11 +8,6 @@
 
 import Foundation
 
-/// Describes how an urge or action input should be tracked in the app
-enum InputType: String, Codable {
-    case binary     // Yes / No — used for actions
-    case scale      // 0 to 10 — used for urges
-}
 
 /// Represents a DBT urge (fixed, optional, or custom) for the user to track
 struct DbtUrge: Identifiable, Codable, Hashable {

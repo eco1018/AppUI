@@ -6,9 +6,6 @@
 //
 
 
-
-//
-
 import Foundation
 
 /// Represents a DBT goal tracked with a Yes/No (binary) input
