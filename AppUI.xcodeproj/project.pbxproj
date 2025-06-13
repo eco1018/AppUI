@@ -48,6 +48,9 @@
 		C822FC732DFB9DA20020DCC1 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = C822FC722DFB9DA20020DCC1 /* FirebaseStorage */; };
 		C822FC752DFB9DA20020DCC1 /* FirebaseStorageCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = C822FC742DFB9DA20020DCC1 /* FirebaseStorageCombine-Community */; };
 		C822FC772DFB9DA20020DCC1 /* FirebaseVertexAI in Frameworks */ = {isa = PBXBuildFile; productRef = C822FC762DFB9DA20020DCC1 /* FirebaseVertexAI */; };
+		C822FC792DFBA0F90020DCC1 /* OnboardingDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C822FC782DFBA0F90020DCC1 /* OnboardingDataManager.swift */; };
+		C822FC7B2DFBA1060020DCC1 /* DiaryEntryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C822FC7A2DFBA1060020DCC1 /* DiaryEntryManager.swift */; };
+		C822FC7D2DFBA12A0020DCC1 /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C822FC7C2DFBA12A0020DCC1 /* AppCoordinator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -80,6 +83,9 @@
 		C822FC392DFB9A270020DCC1 /* DiaryCardModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryCardModel.swift; sourceTree = "<group>"; };
 		C822FC3B2DFB9B290020DCC1 /* UserDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDataManager.swift; sourceTree = "<group>"; };
 		C822FC3D2DFB9C8C0020DCC1 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		C822FC782DFBA0F90020DCC1 /* OnboardingDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingDataManager.swift; sourceTree = "<group>"; };
+		C822FC7A2DFBA1060020DCC1 /* DiaryEntryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryEntryManager.swift; sourceTree = "<group>"; };
+		C822FC7C2DFBA12A0020DCC1 /* AppCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCoordinator.swift; sourceTree = "<group>"; };
 		C8ABF8062DEAE236006963FD /* AppUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AppUI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C8ABF8182DEAE238006963FD /* AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C8ABF8222DEAE238006963FD /* AppUIUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AppUIUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -158,6 +164,9 @@
 		C8ABF7FD2DEAE236006963FD = {
 			isa = PBXGroup;
 			children = (
+				C822FC7C2DFBA12A0020DCC1 /* AppCoordinator.swift */,
+				C822FC7A2DFBA1060020DCC1 /* DiaryEntryManager.swift */,
+				C822FC782DFBA0F90020DCC1 /* OnboardingDataManager.swift */,
 				C822FC3D2DFB9C8C0020DCC1 /* GoogleService-Info.plist */,
 				C822FC3B2DFB9B290020DCC1 /* UserDataManager.swift */,
 				C822FC392DFB9A270020DCC1 /* DiaryCardModel.swift */,
@@ -369,11 +378,14 @@
 				C822FC282DFABB220020DCC1 /* DbtUrges.swift in Sources */,
 				C822FC2E2DFAC0A90020DCC1 /* DbtGoal.swift in Sources */,
 				C822FC362DFAFEC10020DCC1 /* InputType.swift in Sources */,
+				C822FC792DFBA0F90020DCC1 /* OnboardingDataManager.swift in Sources */,
 				C822FC2A2DFABE1D0020DCC1 /* DbtEmotion.swift in Sources */,
 				C822FC302DFAFBD90020DCC1 /* DbtSkillUsefulnessRating.swift in Sources */,
 				C822FC3A2DFB9A340020DCC1 /* DiaryCardModel.swift in Sources */,
 				C822FC382DFB997B0020DCC1 /* UserProfile.swift in Sources */,
 				C822FC2C2DFABF760020DCC1 /* DbtAction.swift in Sources */,
+				C822FC7B2DFBA1060020DCC1 /* DiaryEntryManager.swift in Sources */,
+				C822FC7D2DFBA12A0020DCC1 /* AppCoordinator.swift in Sources */,
 				C822FC342DFAFE600020DCC1 /* DbtDiaryNote.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
