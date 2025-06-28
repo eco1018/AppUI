@@ -190,13 +190,40 @@
 //    SignInView()
 //}
 
+//
+//  SignInView.swift
+//  AppUI
+//
+//  Updated with working navigation
+//
+
+//
+//  SignInView.swift
+//  AppUI
+//
+//  Updated with working navigation
+//
+
+//
+//  SignInView.swift
+//  AppUI
+//
+//  Updated with Firebase Authentication
+//
+
 import SwiftUI
+import FirebaseAuth
 
 struct SignInView: View {
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var isEmailFocused: Bool = false
     @State private var isPasswordFocused: Bool = false
+    @State private var showError: Bool = false
+    @State private var errorMessage: String = ""
+    @State private var isLoading: Bool = false
+    @Binding var currentAuthView: AuthView
 
     var body: some View {
         GeometryReader { geometry in
@@ -286,21 +313,30 @@ struct SignInView: View {
 
                         VStack(spacing: 32) {
                             Button(action: {
-                                // Dummy sign in action
+                                handleSignIn()
                             }) {
-                                Text("Sign In")
-                                    .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(.white)
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 52)
-                                    .background(Color.black)
-                                    .clipShape(RoundedRectangle(cornerRadius: 26))
-                                    .shadow(color: Color.black.opacity(0.15), radius: 15, x: 0, y: 8)
+                                HStack {
+                                    if isLoading {
+                                        ProgressView()
+                                            .scaleEffect(0.8)
+                                            .foregroundColor(.white)
+                                    } else {
+                                        Text("Sign In")
+                                            .font(.system(size: 16, weight: .medium))
+                                            .foregroundColor(.white)
+                                    }
+                                }
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 52)
+                                .background(Color.black)
+                                .clipShape(RoundedRectangle(cornerRadius: 26))
+                                .shadow(color: Color.black.opacity(0.15), radius: 15, x: 0, y: 8)
                             }
+                            .disabled(isLoading || email.isEmpty || password.isEmpty)
 
                             VStack(spacing: 20) {
                                 Button(action: {
-                                    // Dummy forgot password action
+                                    currentAuthView = .forgotPassword
                                 }) {
                                     Text("Forgot Password?")
                                         .font(.system(size: 15, weight: .medium))
@@ -308,7 +344,7 @@ struct SignInView: View {
                                 }
 
                                 Button(action: {
-                                    // Dummy sign up navigation
+                                    currentAuthView = .signUp
                                 }) {
                                     HStack(spacing: 6) {
                                         Text("Don't have an account?")
@@ -330,9 +366,34 @@ struct SignInView: View {
                 }
             }
         }
+        .alert("Authentication Error", isPresented: $showError) {
+            Button("OK") { }
+        } message: {
+            Text(errorMessage)
+        }
+    }
+    
+    private func handleSignIn() {
+        guard !email.isEmpty && !password.isEmpty else { return }
+        
+        isLoading = true
+        
+        Auth.auth().signIn(withEmail: email, password: password) { result, error in
+            DispatchQueue.main.async {
+                isLoading = false
+                
+                if let error = error {
+                    errorMessage = error.localizedDescription
+                    showError = true
+                } else if let user = result?.user {
+                    appCoordinator.handleSuccessfulLogin(userId: user.uid)
+                }
+            }
+        }
     }
 }
 
 #Preview {
-    SignInView()
+    SignInView(currentAuthView: .constant(.signIn))
+        .environmentObject(AppCoordinator())
 }

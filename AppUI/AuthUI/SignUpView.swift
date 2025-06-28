@@ -1,13 +1,18 @@
 //
+//
+//
 //  SignUpView.swift
 //  AppUI
 //
-//  Created by Ella A. Sadduq on 6/8/25.
-
+//  Updated with Firebase Authentication
+//
 
 import SwiftUI
+import FirebaseAuth
 
 struct SignUpView: View {
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    @Binding var currentAuthView: AuthView
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var confirmPassword: String = ""
@@ -15,6 +20,9 @@ struct SignUpView: View {
     @State private var isEmailFocused: Bool = false
     @State private var isPasswordFocused: Bool = false
     @State private var isConfirmPasswordFocused: Bool = false
+    @State private var showError: Bool = false
+    @State private var errorMessage: String = ""
+    @State private var isLoading: Bool = false
 
     var body: some View {
         GeometryReader { geometry in
@@ -137,19 +145,30 @@ struct SignUpView: View {
 
                         VStack(spacing: 24) {
                             Button(action: {
-                                showPasswordMismatch = password != confirmPassword
+                                handleSignUp()
                             }) {
-                                Text("Create Account")
-                                    .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(.white)
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 52)
-                                    .background(Color.black)
-                                    .clipShape(RoundedRectangle(cornerRadius: 26))
-                                    .shadow(color: Color.black.opacity(0.15), radius: 15, x: 0, y: 8)
+                                HStack {
+                                    if isLoading {
+                                        ProgressView()
+                                            .scaleEffect(0.8)
+                                            .foregroundColor(.white)
+                                    } else {
+                                        Text("Create Account")
+                                            .font(.system(size: 16, weight: .medium))
+                                            .foregroundColor(.white)
+                                    }
+                                }
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 52)
+                                .background(Color.black)
+                                .clipShape(RoundedRectangle(cornerRadius: 26))
+                                .shadow(color: Color.black.opacity(0.15), radius: 15, x: 0, y: 8)
                             }
+                            .disabled(isLoading || email.isEmpty || password.isEmpty || confirmPassword.isEmpty)
 
-                            Button(action: {}) {
+                            Button(action: {
+                                currentAuthView = .signIn
+                            }) {
                                 HStack(spacing: 6) {
                                     Text("Already have an account?")
                                         .font(.system(size: 15))
@@ -169,9 +188,55 @@ struct SignUpView: View {
                 }
             }
         }
+        .alert("Registration Error", isPresented: $showError) {
+            Button("OK") { }
+        } message: {
+            Text(errorMessage)
+        }
+    }
+    
+    private func handleSignUp() {
+        // Reset error states
+        showPasswordMismatch = false
+        showError = false
+        
+        // Validate passwords match
+        guard password == confirmPassword else {
+            showPasswordMismatch = true
+            return
+        }
+        
+        // Validate form completion
+        guard !email.isEmpty && !password.isEmpty else {
+            return
+        }
+        
+        // Validate password length (Firebase requirement)
+        guard password.count >= 6 else {
+            errorMessage = "Password must be at least 6 characters long"
+            showError = true
+            return
+        }
+        
+        isLoading = true
+        
+        Auth.auth().createUser(withEmail: email, password: password) { result, error in
+            DispatchQueue.main.async {
+                isLoading = false
+                
+                if let error = error {
+                    errorMessage = error.localizedDescription
+                    showError = true
+                } else if let user = result?.user {
+                    // Account created successfully
+                    appCoordinator.handleSuccessfulLogin(userId: user.uid)
+                }
+            }
+        }
     }
 }
 
 #Preview {
-    SignUpView()
+    SignUpView(currentAuthView: .constant(.signUp))
+        .environmentObject(AppCoordinator())
 }

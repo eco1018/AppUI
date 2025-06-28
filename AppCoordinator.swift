@@ -1,4 +1,5 @@
 //
+//
 //  AppCoordinator.swift
 //  AppUI
 //
@@ -7,6 +8,7 @@
 
 import Foundation
 import SwiftUI
+import FirebaseAuth
 
 @MainActor
 class AppCoordinator: ObservableObject {
@@ -40,33 +42,34 @@ class AppCoordinator: ObservableObject {
     // MARK: - Authentication Flow
     
     private func checkUserAuthenticationStatus() {
-        // TODO: Implement actual authentication check
-        // For now, we'll simulate checking if user data exists
-        
-        Task {
-            do {
-                // Try to load user profile with a stored user ID
-                if let savedUserId = UserDefaults.standard.string(forKey: "userId"),
-                   let userProfile = try await userDataManager.loadUserProfile(userId: savedUserId) {
-                    
-                    // User exists and has completed onboarding
-                    isUserLoggedIn = true
-                    hasCompletedOnboarding = true
-                    appState = .main
-                    
-                } else {
-                    // No user found, show authentication
-                    appState = .authentication
+        if let currentUser = Auth.auth().currentUser {
+            // User is signed in with Firebase
+            isUserLoggedIn = true
+            
+            Task {
+                do {
+                    // Try to load user profile from Firestore
+                    if let userProfile = try await userDataManager.loadUserProfile(userId: currentUser.uid) {
+                        hasCompletedOnboarding = true
+                        appState = .main
+                    } else {
+                        // User exists in Firebase but no profile in Firestore - needs onboarding
+                        hasCompletedOnboarding = false
+                        appState = .onboarding
+                    }
+                } catch {
+                    // Error loading user profile - assume needs onboarding
+                    hasCompletedOnboarding = false
+                    appState = .onboarding
                 }
-            } catch {
-                // Error loading user, show authentication
-                appState = .authentication
             }
+        } else {
+            // No user signed in
+            appState = .authentication
         }
     }
     
     func handleSuccessfulLogin(userId: String) {
-        UserDefaults.standard.set(userId, forKey: "userId")
         isUserLoggedIn = true
         
         // Check if user has completed onboarding
@@ -76,6 +79,7 @@ class AppCoordinator: ObservableObject {
                     hasCompletedOnboarding = true
                     appState = .main
                 } else {
+                    // User authenticated but no profile exists - needs onboarding
                     hasCompletedOnboarding = false
                     appState = .onboarding
                 }
@@ -88,15 +92,22 @@ class AppCoordinator: ObservableObject {
     }
     
     func handleLogout() {
-        UserDefaults.standard.removeObject(forKey: "userId")
-        isUserLoggedIn = false
-        hasCompletedOnboarding = false
-        appState = .authentication
-        
-        // Reset all managers
-        userDataManager = UserDataManager()
-        onboardingManager = OnboardingDataManager()
-        diaryManager = DiaryEntryManager()
+        do {
+            try Auth.auth().signOut()
+            
+            // Clear local state
+            isUserLoggedIn = false
+            hasCompletedOnboarding = false
+            appState = .authentication
+            
+            // Reset all managers
+            userDataManager = UserDataManager()
+            onboardingManager = OnboardingDataManager()
+            diaryManager = DiaryEntryManager()
+            
+        } catch {
+            print("Error signing out: \(error.localizedDescription)")
+        }
     }
     
     // MARK: - Onboarding Flow
@@ -131,12 +142,12 @@ class AppCoordinator: ObservableObject {
     }
     
     func completeDiaryEntry() {
-        guard let userId = userDataManager.currentUser?.id else { return }
+        guard let currentUser = Auth.auth().currentUser else { return }
         
         Task {
             do {
                 try await diaryManager.completeDiaryEntry(
-                    userId: userId,
+                    userId: currentUser.uid,
                     userDataManager: userDataManager
                 )
                 appState = .main
@@ -166,10 +177,10 @@ class AppCoordinator: ObservableObject {
     // MARK: - Data Loading Helpers
     
     func loadTodaysDiaryCard() async {
-        guard let userId = userDataManager.currentUser?.id else { return }
+        guard let currentUser = Auth.auth().currentUser else { return }
         
         do {
-            let todaysCard = try await userDataManager.loadTodaysDiaryCard(userId: userId)
+            let todaysCard = try await userDataManager.loadTodaysDiaryCard(userId: currentUser.uid)
             if let card = todaysCard {
                 diaryManager.loadExistingEntry(card)
             }
@@ -179,10 +190,10 @@ class AppCoordinator: ObservableObject {
     }
     
     func loadRecentDiaryCards() async -> [DiaryCard] {
-        guard let userId = userDataManager.currentUser?.id else { return [] }
+        guard let currentUser = Auth.auth().currentUser else { return [] }
         
         do {
-            return try await userDataManager.loadRecentDiaryCards(userId: userId)
+            return try await userDataManager.loadRecentDiaryCards(userId: currentUser.uid)
         } catch {
             print("Failed to load recent diary cards: \(error)")
             return []
@@ -202,12 +213,17 @@ class AppCoordinator: ObservableObject {
     var errorMessage: String? {
         userDataManager.errorMessage
     }
+    
+    var currentFirebaseUser: User? {
+        Auth.auth().currentUser
+    }
 }
 
-// MARK: - Mock Authentication (Remove in production)
+// MARK: - Development/Mock Authentication (Keep for testing)
 
 extension AppCoordinator {
     func mockLogin(firstName: String, lastName: String) {
+        // This can be kept for development/testing purposes
         let mockUserId = UUID().uuidString
         handleSuccessfulLogin(userId: mockUserId)
     }
@@ -215,7 +231,6 @@ extension AppCoordinator {
     func skipAuthentication() {
         // For development/testing purposes
         let mockUserId = UUID().uuidString
-        UserDefaults.standard.set(mockUserId, forKey: "userId")
         isUserLoggedIn = true
         hasCompletedOnboarding = false
         appState = .onboarding

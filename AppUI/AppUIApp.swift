@@ -1,5 +1,8 @@
 //
 //
+//
+//
+//
 //  AppUIApp.swift
 //  AppUI
 //
@@ -95,17 +98,23 @@ struct LoadingView: View {
 
 struct AuthenticationFlow: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @State private var showSignUp = false
+    @State private var currentAuthView: AuthView = .signIn
     
     var body: some View {
         NavigationView {
-            if showSignUp {
-                SignUpView()
-                    .navigationBarHidden(true)
-            } else {
-                SignInView()
-                    .navigationBarHidden(true)
+            Group {
+                switch currentAuthView {
+                case .signIn:
+                    SignInView(currentAuthView: $currentAuthView)
+                        .environmentObject(appCoordinator)
+                case .signUp:
+                    SignUpView(currentAuthView: $currentAuthView)
+                        .environmentObject(appCoordinator)
+                case .forgotPassword:
+                    ForgotPasswordView(currentAuthView: $currentAuthView)
+                }
             }
+            .navigationBarHidden(true)
         }
         .overlay(
             // Development helper - remove in production
@@ -125,6 +134,12 @@ struct AuthenticationFlow: View {
             }
         )
     }
+}
+
+enum AuthView {
+    case signIn
+    case signUp
+    case forgotPassword
 }
 
 struct OnboardingFlow: View {
