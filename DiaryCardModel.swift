@@ -1,5 +1,6 @@
 
 //
+//
 //  DiaryCardModel.swift
 //  AppUI
 //
@@ -14,7 +15,7 @@ struct UrgeResponse: Codable, Identifiable {
     let id: String
     let urgeId: String    // Which urge (references the ID)
     let intensity: Int    // User's 0-10 rating
-    
+
     init(urgeId: String, intensity: Int) {
         self.id = UUID().uuidString
         self.urgeId = urgeId
@@ -26,7 +27,7 @@ struct EmotionResponse: Codable, Identifiable {
     let id: String
     let emotionId: String // Which emotion (references the ID)
     let intensity: Int    // User's 0-10 rating
-    
+
     init(emotionId: String, intensity: Int) {
         self.id = UUID().uuidString
         self.emotionId = emotionId
@@ -38,7 +39,7 @@ struct GoalResponse: Codable, Identifiable {
     let id: String
     let goalId: String    // Which goal (references the ID)
     let completed: Bool   // User's Yes/No answer
-    
+
     init(goalId: String, completed: Bool) {
         self.id = UUID().uuidString
         self.goalId = goalId
@@ -50,7 +51,7 @@ struct ActionResponse: Codable, Identifiable {
     let id: String
     let actionId: String  // Which action (references the ID)
     let performed: Bool   // User's Yes/No answer
-    
+
     init(actionId: String, performed: Bool) {
         self.id = UUID().uuidString
         self.actionId = actionId
@@ -64,33 +65,46 @@ struct DiaryCard: Codable, Identifiable {
     let id: String
     let userId: String    // Links back to UserProfile
     let date: Date        // Which day this entry is for
-    
+
     // All responses for this day
     let urgeResponses: [UrgeResponse]
     let emotionResponses: [EmotionResponse]
     let goalResponses: [GoalResponse]
     let actionResponses: [ActionResponse]
-    
+
     // Additional daily data
     let skillRating: DbtSkillUsefulnessRating?
     let medicationCheckIn: DbtMedicationCheckIn?
     let note: DbtDiaryNote?
-    
+
     let createdAt: Date
     let updatedAt: Date
-    
-    init(userId: String, date: Date = Date()) {
-        self.id = UUID().uuidString
+
+    init(
+        id: String = UUID().uuidString,
+        userId: String,
+        date: Date = Date(),
+        urgeResponses: [UrgeResponse] = [],
+        emotionResponses: [EmotionResponse] = [],
+        goalResponses: [GoalResponse] = [],
+        actionResponses: [ActionResponse] = [],
+        skillRating: DbtSkillUsefulnessRating? = nil,
+        medicationCheckIn: DbtMedicationCheckIn? = nil,
+        note: DbtDiaryNote? = nil,
+        createdAt: Date = Date(),
+        updatedAt: Date = Date()
+    ) {
+        self.id = id
         self.userId = userId
         self.date = Calendar.current.startOfDay(for: date)
-        self.urgeResponses = []
-        self.emotionResponses = []
-        self.goalResponses = []
-        self.actionResponses = []
-        self.skillRating = nil
-        self.medicationCheckIn = nil
-        self.note = nil
-        self.createdAt = Date()
-        self.updatedAt = Date()
+        self.urgeResponses = urgeResponses
+        self.emotionResponses = emotionResponses
+        self.goalResponses = goalResponses
+        self.actionResponses = actionResponses
+        self.skillRating = skillRating
+        self.medicationCheckIn = medicationCheckIn
+        self.note = note
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
     }
 }
