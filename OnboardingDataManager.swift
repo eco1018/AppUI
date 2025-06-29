@@ -2,10 +2,6 @@
 //  OnboardingDataManager.swift
 //  AppUI
 //
-//  Created by Ella A. Sadduq on 6/12/25.
-//
-
-
 //
 //  OnboardingDataManager.swift
 //  AppUI
@@ -15,6 +11,7 @@
 
 import Foundation
 import SwiftUI
+import FirebaseAuth
 
 @MainActor
 class OnboardingDataManager: ObservableObject {
@@ -122,6 +119,16 @@ class OnboardingDataManager: ObservableObject {
     // MARK: - Data Conversion & Completion
     
     func completeOnboarding(with userDataManager: UserDataManager) async throws {
+        print("🎯 Starting onboarding completion...")
+        
+        // Make sure we have a current Firebase user
+        guard let currentUser = Auth.auth().currentUser else {
+            print("❌ No authenticated user found")
+            throw NSError(domain: "OnboardingError", code: 0, userInfo: [NSLocalizedDescriptionKey: "No authenticated user"])
+        }
+        
+        print("👤 Current user ID: \(currentUser.uid)")
+        
         // Convert indices to actual IDs
         let selectedUrgeIds = convertIndicesToIds(
             indices: selectedUrgeIndices,
@@ -141,9 +148,13 @@ class OnboardingDataManager: ObservableObject {
             customItems: customActions
         )
         
-        // Create UserProfile
+        print("📊 Selected urges: \(selectedUrgeIds)")
+        print("📊 Selected goals: \(selectedGoalIds)")
+        print("📊 Selected actions: \(selectedActionIds)")
+        
+        // Create UserProfile with Firebase UID
         let userProfile = UserProfile(
-            id: UUID().uuidString,
+            id: currentUser.uid,  // Use Firebase UID as the profile ID
             firstName: firstName,
             lastName: lastName,
             age: age,
@@ -159,11 +170,17 @@ class OnboardingDataManager: ObservableObject {
             updatedAt: Date()
         )
         
-        // Save to Firebase
+        print("💾 Saving user profile to Firestore...")
+        
+        // Save to Firebase Firestore
         try await userDataManager.saveUserProfile(userProfile)
+        
+        print("✅ User profile saved successfully!")
         
         // Mark onboarding as complete
         isOnboardingComplete = true
+        
+        print("🎉 Onboarding completion process finished!")
     }
     
     private func convertIndicesToIds<T: Identifiable>(
@@ -176,10 +193,12 @@ class OnboardingDataManager: ObservableObject {
         for index in indices {
             if index < standardItems.count {
                 ids.append(standardItems[index].id)
+                print("📝 Selected standard item: \(standardItems[index].id)")
             } else {
                 let customIndex = index - standardItems.count
                 if customIndex < customItems.count {
                     ids.append(customItems[customIndex].id)
+                    print("📝 Selected custom item: \(customItems[customIndex].id)")
                 }
             }
         }
@@ -214,9 +233,16 @@ class OnboardingDataManager: ObservableObject {
         }
     }
     
+    var progressPercentage: Double {
+        let totalSteps = OnboardingStep.allCases.count - 1 // Exclude .success
+        guard let currentIndex = OnboardingStep.allCases.firstIndex(of: currentStep) else { return 0 }
+        return Double(currentIndex) / Double(totalSteps)
+    }
+    
     // MARK: - Reset
     
     func resetOnboarding() {
+        print("🔄 Resetting onboarding data...")
         firstName = ""
         lastName = ""
         age = 18
@@ -230,5 +256,6 @@ class OnboardingDataManager: ObservableObject {
         customUrges.removeAll()
         currentStep = .intro
         isOnboardingComplete = false
+        print("✅ Onboarding data reset complete")
     }
 }

@@ -1,6 +1,7 @@
 //
 
 //
+//
 //  OnboardingIntroView.swift
 //  aura
 //
@@ -10,6 +11,8 @@
 import SwiftUI
 
 struct OnboardingIntroView: View {
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var onboardingManager: OnboardingDataManager
     @State private var isVisible = false
     
     var body: some View {
@@ -43,7 +46,7 @@ struct OnboardingIntroView: View {
                     
                     // Central START button - interactive
                     Button(action: {
-                        // Navigation action goes here
+                        onboardingManager.nextStep()
                     }) {
                         ZStack {
                             // Outer subtle ring
@@ -71,14 +74,34 @@ struct OnboardingIntroView: View {
                 .padding(.horizontal, 32)
                 
                 Spacer()
+                
+                // Cancel button at bottom
+                Button(action: {
+                    handleCancel()
+                }) {
+                    Text("Cancel")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.secondary.opacity(0.7))
+                }
+                .opacity(isVisible ? 1.0 : 0.0)
+                .animation(.easeOut(duration: 0.6).delay(0.8), value: isVisible)
+                .padding(.bottom, 40)
             }
         }
         .onAppear {
             isVisible = true
         }
     }
+    
+    private func handleCancel() {
+        // Reset onboarding and return to authentication
+        onboardingManager.resetOnboarding()
+        appCoordinator.handleLogout()
+    }
 }
 
 #Preview {
     OnboardingIntroView()
+        .environmentObject(AppCoordinator())
+        .environmentObject(OnboardingDataManager())
 }
