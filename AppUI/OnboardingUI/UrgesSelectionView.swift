@@ -447,9 +447,18 @@
 //  Enhanced version with smooth scrolling - Optimized for compilation
 //
 
+//
+//
+//  UrgesSelectionView.swift
+//  AppUI
+//
+//  Enhanced version with smooth scrolling - Optimized for compilation
+//
+
 import SwiftUI
 
 struct UrgesSelectionView: View {
+    @EnvironmentObject var onboardingManager: OnboardingDataManager
     @State private var selectedUrges: Set<Int> = []
     @State private var animateContent = false
     @State private var showContinueButton = false
@@ -482,6 +491,12 @@ struct UrgesSelectionView: View {
             .ignoresSafeArea()
             
             VStack(spacing: 0) {
+                // Progress bar at top
+                OnboardingProgressBar()
+                    .opacity(animateContent ? 1.0 : 0.0)
+                    .offset(y: animateContent ? 0 : -20)
+                    .animation(.easeOut(duration: 0.6).delay(0.1), value: animateContent)
+                
                 headerSection
                 scrollableContent
                 bottomSection
@@ -507,7 +522,7 @@ struct UrgesSelectionView: View {
                 Spacer()
             }
             .padding(.horizontal, 30)
-            .padding(.top, 60)
+            .padding(.top, 20)
             .padding(.bottom, 40)
             
             // Title and subtitle
@@ -837,4 +852,6 @@ struct ScrollOffsetPreferenceKey: PreferenceKey {
 
 #Preview {
     UrgesSelectionView()
+        .environmentObject(OnboardingDataManager())
 }
+

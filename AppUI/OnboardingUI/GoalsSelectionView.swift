@@ -1,16 +1,17 @@
 //
 //  GoalsSelectionView.swift
 //
+//
 //  GoalsSelectionView.swift
 //  AppUI
 //
-//  Minimalist goals selection interface
+//  Minimalist goals selection interface with progress bar
 //
 
 import SwiftUI
 
 struct GoalsSelectionView: View {
-    @State private var selectedGoals: Set<Int> = []
+    @EnvironmentObject var onboardingManager: OnboardingDataManager
     @State private var animateContent = false
     @State private var showContinueButton = false
     @State private var activeItemIndex: Int = 0
@@ -44,6 +45,12 @@ struct GoalsSelectionView: View {
             .ignoresSafeArea()
             
             VStack(spacing: 0) {
+                // Progress bar at top
+                OnboardingProgressBar()
+                    .opacity(animateContent ? 1.0 : 0.0)
+                    .offset(y: animateContent ? 0 : -20)
+                    .animation(.easeOut(duration: 0.6).delay(0.1), value: animateContent)
+                
                 headerSection
                 scrollableContent
                 bottomSection
@@ -59,7 +66,7 @@ struct GoalsSelectionView: View {
         VStack(spacing: 0) {
             HStack {
                 Button(action: {
-                    // Navigate back
+                    onboardingManager.previousStep()
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .light))
@@ -69,7 +76,7 @@ struct GoalsSelectionView: View {
                 Spacer()
             }
             .padding(.horizontal, 30)
-            .padding(.top, 60)
+            .padding(.top, 20)
             .padding(.bottom, 40)
             
             // Title and subtitle
@@ -100,7 +107,7 @@ struct GoalsSelectionView: View {
                 // Selection indicators
                 HStack(spacing: 8) {
                     ForEach(0..<2, id: \.self) { index in
-                        let isSelected = index < selectedGoals.count
+                        let isSelected = index < onboardingManager.selectedGoalIndices.count
                         let circleColor = isSelected ? Color(red: 0.15, green: 0.15, blue: 0.2) : Color(red: 0.75, green: 0.75, blue: 0.77)
                         let scaleEffect: CGFloat = isSelected ? 1.3 : 1.0
                         
@@ -108,7 +115,7 @@ struct GoalsSelectionView: View {
                             .fill(circleColor)
                             .frame(width: 5, height: 5)
                             .scaleEffect(scaleEffect)
-                            .animation(.spring(response: 0.4, dampingFraction: 0.7), value: selectedGoals.count)
+                            .animation(.spring(response: 0.4, dampingFraction: 0.7), value: onboardingManager.selectedGoalIndices.count)
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -145,7 +152,7 @@ struct GoalsSelectionView: View {
     
     private func goalItemView(goal: GoalItem, index: Int) -> some View {
         let isActive = index == activeItemIndex
-        let isSelected = selectedGoals.contains(index)
+        let isSelected = onboardingManager.selectedGoalIndices.contains(index)
         let isSelectable = true
         
         return Button(action: {
@@ -183,7 +190,7 @@ struct GoalsSelectionView: View {
     }
     
     private func titleView(goal: GoalItem, index: Int, isActive: Bool) -> some View {
-        let isSelected = selectedGoals.contains(index)
+        let isSelected = onboardingManager.selectedGoalIndices.contains(index)
         
         // Size logic: selected items get bigger, active items get biggest
         let fontSize: CGFloat = {
@@ -210,7 +217,7 @@ struct GoalsSelectionView: View {
             .lineLimit(nil)
             .fixedSize(horizontal: false, vertical: true)
             .animation(.interpolatingSpring(stiffness: 200, damping: 20), value: activeItemIndex)
-            .animation(.interpolatingSpring(stiffness: 200, damping: 20), value: selectedGoals)
+            .animation(.interpolatingSpring(stiffness: 200, damping: 20), value: onboardingManager.selectedGoalIndices)
     }
     
     private func descriptionView(goal: GoalItem) -> some View {
@@ -273,7 +280,7 @@ struct GoalsSelectionView: View {
                 Button(action: {
                     let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
                     impactFeedback.impactOccurred()
-                    // Handle continue action
+                    onboardingManager.nextStep()
                 }) {
                     Text("next")
                         .font(.system(size: 24, weight: .light))
@@ -294,26 +301,17 @@ struct GoalsSelectionView: View {
         let impactFeedback = UIImpactFeedbackGenerator(style: .light)
         impactFeedback.impactOccurred()
         
-        // Allow selection of any item, limit to 2
+        // Use onboardingManager's toggle method
+        onboardingManager.toggleGoalSelection(index)
+        
+        // Update continue button based on selection count
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-            if selectedGoals.contains(index) {
-                selectedGoals.remove(index)
-                showContinueButton = false
-            } else if selectedGoals.count < 2 {
-                selectedGoals.insert(index)
-                if selectedGoals.count == 2 {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                        withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
-                            showContinueButton = true
-                        }
-                    }
-                }
-            }
+            showContinueButton = onboardingManager.selectedGoalIndices.count == 2
         }
     }
     
     private func getTextColor(for index: Int) -> Color {
-        let isSelected = selectedGoals.contains(index)
+        let isSelected = onboardingManager.selectedGoalIndices.contains(index)
         
         if index == activeItemIndex {
             return isSelected ?
@@ -329,7 +327,7 @@ struct GoalsSelectionView: View {
     private func getTextOpacity(for index: Int) -> Double {
         if index == activeItemIndex {
             return 1.0
-        } else if selectedGoals.contains(index) {
+        } else if onboardingManager.selectedGoalIndices.contains(index) {
             return 0.9
         } else {
             let distance = abs(index - activeItemIndex)
@@ -368,6 +366,9 @@ struct GoalsSelectionView: View {
         withAnimation(.easeOut(duration: 0.6)) {
             animateContent = true
         }
+        
+        // Check if continue button should be shown on load
+        showContinueButton = onboardingManager.selectedGoalIndices.count == 2
     }
 }
 
@@ -397,4 +398,5 @@ struct GoalsScrollOffsetPreferenceKey: PreferenceKey {
 
 #Preview {
     GoalsSelectionView()
+        .environmentObject(OnboardingDataManager())
 }

@@ -6,13 +6,13 @@
 //  AgeSelectionView.swift
 //  AppUI
 //
-//  Age selection with slider interface
+//  Age selection with slider interface and progress bar
 //
 
 import SwiftUI
 
 struct AgeSelectionView: View {
-    @State private var selectedAge: Double = 25
+    @EnvironmentObject var onboardingManager: OnboardingDataManager
     @State private var animateContent = false
     @State private var showContinueButton = true
     
@@ -34,6 +34,12 @@ struct AgeSelectionView: View {
             .ignoresSafeArea()
             
             VStack(spacing: 0) {
+                // Progress bar at top
+                OnboardingProgressBar()
+                    .opacity(animateContent ? 1.0 : 0.0)
+                    .offset(y: animateContent ? 0 : -20)
+                    .animation(.easeOut(duration: 0.6).delay(0.1), value: animateContent)
+                
                 headerSection
                 Spacer()
                 ageSelectionContent
@@ -51,7 +57,7 @@ struct AgeSelectionView: View {
         VStack(spacing: 0) {
             HStack {
                 Button(action: {
-                    // Navigate back
+                    onboardingManager.previousStep()
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .light))
@@ -61,7 +67,7 @@ struct AgeSelectionView: View {
                 Spacer()
             }
             .padding(.horizontal, 30)
-            .padding(.top, 60)
+            .padding(.top, 20)
             .padding(.bottom, 40)
             
             // Title and subtitle
@@ -99,7 +105,7 @@ struct AgeSelectionView: View {
         VStack(spacing: 40) {
             // Current age display
             VStack(spacing: 8) {
-                Text("\(Int(selectedAge))")
+                Text("\(onboardingManager.age)")
                     .font(.system(size: 64, weight: .ultraLight))
                     .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
                     .opacity(animateContent ? 1.0 : 0.0)
@@ -120,18 +126,18 @@ struct AgeSelectionView: View {
                     // Curved track that creates a mound at the current position
                     ZStack {
                         // Curved line that creates the mound effect (no background line)
-                        CurvedSliderShape(progress: CGFloat((selectedAge - minAge) / (maxAge - minAge)))
+                        CurvedSliderShape(progress: CGFloat((Double(onboardingManager.age) - minAge) / (maxAge - minAge)))
                             .stroke(Color(red: 0.15, green: 0.15, blue: 0.2), lineWidth: 2.5)
                             .opacity(animateContent ? 1.0 : 0.0)
                             .animation(.easeOut(duration: 0.8).delay(1.0), value: animateContent)
-                            .animation(.easeInOut(duration: 0.3), value: selectedAge)
+                            .animation(.easeInOut(duration: 0.3), value: onboardingManager.age)
                     }
                     .frame(height: 30) // Increased height to accommodate the curve
                     
                     // Slider thumb positioned below the track
                     HStack {
                         Spacer()
-                            .frame(width: sliderWidth * CGFloat((selectedAge - minAge) / (maxAge - minAge)) - 12)
+                            .frame(width: sliderWidth * CGFloat((Double(onboardingManager.age) - minAge) / (maxAge - minAge)) - 12)
                         
                         Circle()
                             .fill(Color(red: 0.15, green: 0.15, blue: 0.2))
@@ -149,7 +155,7 @@ struct AgeSelectionView: View {
                     DragGesture(minimumDistance: 0)
                         .onChanged { value in
                             let newValue = min(max(minAge, minAge + (maxAge - minAge) * Double(value.location.x / sliderWidth)), maxAge)
-                            selectedAge = newValue
+                            onboardingManager.age = Int(newValue)
                             
                             // Haptic feedback on value change
                             let impactFeedback = UIImpactFeedbackGenerator(style: .light)
@@ -168,7 +174,7 @@ struct AgeSelectionView: View {
                 Button(action: {
                     let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
                     impactFeedback.impactOccurred()
-                    // Handle continue action
+                    onboardingManager.nextStep()
                 }) {
                     Text("next")
                         .font(.system(size: 24, weight: .light))
@@ -241,4 +247,5 @@ struct CurvedSliderShape: Shape {
 
 #Preview {
     AgeSelectionView()
+        .environmentObject(OnboardingDataManager())
 }

@@ -234,9 +234,18 @@ class OnboardingDataManager: ObservableObject {
     }
     
     var progressPercentage: Double {
-        let totalSteps = OnboardingStep.allCases.count - 1 // Exclude .success
-        guard let currentIndex = OnboardingStep.allCases.firstIndex(of: currentStep) else { return 0 }
-        return Double(currentIndex) / Double(totalSteps)
+        // Calculate progress for steps that show the progress bar (exclude intro and success)
+        let progressSteps = OnboardingStep.allCases.filter { step in
+            step != .intro && step != .success
+        }
+        
+        guard let currentIndex = progressSteps.firstIndex(of: currentStep) else {
+            return 0
+        }
+        
+        // Add 1 to currentIndex to show progress at start of step, not end
+        let progress = Double(currentIndex + 1) / Double(progressSteps.count)
+        return min(progress, 1.0) // Cap at 100%
     }
     
     // MARK: - Reset

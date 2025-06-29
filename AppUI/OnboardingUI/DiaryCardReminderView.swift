@@ -9,13 +9,13 @@
 //  DiaryCardReminderView.swift
 //  AppUI
 //
-//  Daily reminder time selection
+//  Daily reminder time selection with progress bar
 //
 
 import SwiftUI
 
 struct DiaryCardReminderView: View {
-    @State private var selectedTime = Date()
+    @EnvironmentObject var onboardingManager: OnboardingDataManager
     @State private var animateContent = false
     @State private var showContinueButton = true
     
@@ -34,6 +34,12 @@ struct DiaryCardReminderView: View {
             .ignoresSafeArea()
             
             VStack(spacing: 0) {
+                // Progress bar at top
+                OnboardingProgressBar()
+                    .opacity(animateContent ? 1.0 : 0.0)
+                    .offset(y: animateContent ? 0 : -20)
+                    .animation(.easeOut(duration: 0.6).delay(0.1), value: animateContent)
+                
                 headerSection
                 Spacer()
                 reminderTimeContent
@@ -51,7 +57,7 @@ struct DiaryCardReminderView: View {
         VStack(spacing: 0) {
             HStack {
                 Button(action: {
-                    // Navigate back
+                    onboardingManager.previousStep()
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .light))
@@ -61,7 +67,7 @@ struct DiaryCardReminderView: View {
                 Spacer()
             }
             .padding(.horizontal, 30)
-            .padding(.top, 60)
+            .padding(.top, 20)
             .padding(.bottom, 40)
             
             // Title and subtitle
@@ -100,7 +106,7 @@ struct DiaryCardReminderView: View {
             // Minimalistic scrollable time display - easy to interact with
             ZStack {
                 // Just the large time - clean and minimal
-                Text(timeFormatter.string(from: selectedTime))
+                Text(timeFormatter.string(from: onboardingManager.reminderTime))
                     .font(.system(size: 64, weight: .ultraLight))
                     .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
                     .tracking(-2)
@@ -109,14 +115,14 @@ struct DiaryCardReminderView: View {
                     .animation(.easeOut(duration: 0.8).delay(0.6), value: animateContent)
                 
                 // Large, easy-to-interact-with invisible picker
-                DatePicker("", selection: $selectedTime, displayedComponents: .hourAndMinute)
+                DatePicker("", selection: $onboardingManager.reminderTime, displayedComponents: .hourAndMinute)
                     .datePickerStyle(.wheel)
                     .labelsHidden()
                     .opacity(0)
                     .scaleEffect(1.5) // Larger for easier interaction
                     .allowsHitTesting(true)
                     .frame(width: 300, height: 200) // Large interaction area
-                    .onChange(of: selectedTime) { _ in
+                    .onChange(of: onboardingManager.reminderTime) { _ in
                         let impactFeedback = UIImpactFeedbackGenerator(style: .light)
                         impactFeedback.impactOccurred()
                     }
@@ -141,7 +147,7 @@ struct DiaryCardReminderView: View {
                 Button(action: {
                     let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
                     impactFeedback.impactOccurred()
-                    // Handle continue action
+                    onboardingManager.nextStep()
                 }) {
                     Text("next")
                         .font(.system(size: 24, weight: .light))
@@ -173,4 +179,5 @@ struct DiaryCardReminderView: View {
 
 #Preview {
     DiaryCardReminderView()
+        .environmentObject(OnboardingDataManager())
 }

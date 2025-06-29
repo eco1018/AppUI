@@ -1,15 +1,16 @@
 
 //
+//
 //  FirstNameView.swift
 //  AppUI
 //
-//  Simple first name input with clean design
+//  Simple first name input with clean design and progress bar
 //
 
 import SwiftUI
 
 struct FirstNameView: View {
-    @State private var firstName: String = ""
+    @EnvironmentObject var onboardingManager: OnboardingDataManager
     @State private var animateContent = false
     @State private var showContinueButton = false
     @FocusState private var isTextFieldFocused: Bool
@@ -29,6 +30,12 @@ struct FirstNameView: View {
             .ignoresSafeArea()
             
             VStack(spacing: 0) {
+                // Progress bar at top
+                OnboardingProgressBar()
+                    .opacity(animateContent ? 1.0 : 0.0)
+                    .offset(y: animateContent ? 0 : -20)
+                    .animation(.easeOut(duration: 0.6).delay(0.1), value: animateContent)
+                
                 headerSection
                 Spacer()
                 nameInputContent
@@ -39,7 +46,7 @@ struct FirstNameView: View {
         .onAppear {
             performAppearAnimations()
         }
-        .onChange(of: firstName) { _ in
+        .onChange(of: onboardingManager.firstName) { _ in
             updateContinueButton()
         }
         .onTapGesture {
@@ -52,7 +59,7 @@ struct FirstNameView: View {
         VStack(spacing: 0) {
             HStack {
                 Button(action: {
-                    // Navigate back
+                    onboardingManager.previousStep()
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .light))
@@ -62,7 +69,7 @@ struct FirstNameView: View {
                 Spacer()
             }
             .padding(.horizontal, 30)
-            .padding(.top, 60)
+            .padding(.top, 20)
             .padding(.bottom, 40)
         }
     }
@@ -81,7 +88,7 @@ struct FirstNameView: View {
                 .animation(.easeOut(duration: 0.8).delay(0.2), value: animateContent)
             
             // Clean text input
-            TextField("", text: $firstName)
+            TextField("", text: $onboardingManager.firstName)
                 .font(.system(size: 24, weight: .light))
                 .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
                 .multilineTextAlignment(.center)
@@ -102,7 +109,7 @@ struct FirstNameView: View {
                     let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
                     impactFeedback.impactOccurred()
                     hideKeyboard()
-                    // Handle continue action
+                    onboardingManager.nextStep()
                 }) {
                     Text("next")
                         .font(.system(size: 24, weight: .light))
@@ -120,7 +127,7 @@ struct FirstNameView: View {
     
     // MARK: - Helper Methods
     private func updateContinueButton() {
-        let trimmedName = firstName.trimmingCharacters(in: .whitespaces)
+        let trimmedName = onboardingManager.firstName.trimmingCharacters(in: .whitespaces)
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
             showContinueButton = !trimmedName.isEmpty
         }
@@ -145,4 +152,5 @@ struct FirstNameView: View {
 
 #Preview {
     FirstNameView()
+        .environmentObject(OnboardingDataManager())
 }
