@@ -2,6 +2,10 @@
 //  MedicationsView.swift
 //  AppUI
 //
+//
+//  MedicationsView.swift
+//  AppUI
+//
 //  MedicationsView.swift
 //  AppUI
 //
@@ -54,7 +58,7 @@ struct MedicationsView: View {
         VStack(spacing: 0) {
             HStack {
                 Button(action: {
-                    // Navigate back
+                    onboardingManager.previousStep()
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .light))
@@ -142,7 +146,7 @@ struct MedicationsView: View {
                 Button(action: {
                     let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
                     impactFeedback.impactOccurred()
-                    // Handle continue action
+                    onboardingManager.nextStep()  // FIX: Actually proceed to next step
                 }) {
                     Text("next")
                         .font(.system(size: 24, weight: .light))
@@ -165,6 +169,8 @@ struct MedicationsView: View {
         
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
             selectedOption = option
+            // FIX: Update the onboardingManager with the user's selection
+            onboardingManager.takesMediation = (option == "Yes")
             showContinueButton = true
         }
     }

@@ -6,12 +6,18 @@
 //  Minimalist actions selection interface with progress bar
 //
 
+//
+//  ActionsSelectionView.swift
+//  AppUI
+//
+//  Minimalist actions selection interface with progress bar - Integrated with OnboardingDataManager
+//
+
 import SwiftUI
 
 struct ActionsSelectionView: View {
     @EnvironmentObject var onboardingManager: OnboardingDataManager
     @State private var animateContent = false
-    @State private var showContinueButton = false
     @State private var activeItemIndex: Int = 0
     
     let actions = [
@@ -101,7 +107,7 @@ struct ActionsSelectionView: View {
                     Spacer()
                 }
                 
-                // Selection indicators
+                // Selection indicators - USE ONBOARDING MANAGER STATE
                 HStack(spacing: 8) {
                     ForEach(0..<3, id: \.self) { index in
                         let isSelected = index < onboardingManager.selectedActionIndices.count
@@ -149,7 +155,7 @@ struct ActionsSelectionView: View {
     
     private func actionItemView(action: ActionItem, index: Int) -> some View {
         let isActive = index == activeItemIndex
-        let isSelected = onboardingManager.selectedActionIndices.contains(index)
+        let isSelected = onboardingManager.selectedActionIndices.contains(index) // USE ONBOARDING MANAGER STATE
         let isSelectable = true
         
         return Button(action: {
@@ -187,7 +193,7 @@ struct ActionsSelectionView: View {
     }
     
     private func titleView(action: ActionItem, index: Int, isActive: Bool) -> some View {
-        let isSelected = onboardingManager.selectedActionIndices.contains(index)
+        let isSelected = onboardingManager.selectedActionIndices.contains(index) // USE ONBOARDING MANAGER STATE
         
         // Size logic: selected items get bigger, active items get biggest
         let fontSize: CGFloat = {
@@ -214,7 +220,7 @@ struct ActionsSelectionView: View {
             .lineLimit(nil)
             .fixedSize(horizontal: false, vertical: true)
             .animation(.interpolatingSpring(stiffness: 200, damping: 20), value: activeItemIndex)
-            .animation(.interpolatingSpring(stiffness: 200, damping: 20), value: onboardingManager.selectedActionIndices)
+            .animation(.interpolatingSpring(stiffness: 200, damping: 20), value: onboardingManager.selectedActionIndices) // USE ONBOARDING MANAGER STATE
     }
     
     private func descriptionView(action: ActionItem) -> some View {
@@ -273,20 +279,21 @@ struct ActionsSelectionView: View {
     // MARK: - Bottom Section
     private var bottomSection: some View {
         VStack {
-            if showContinueButton {
+            // SHOW CONTINUE BUTTON BASED ON ONBOARDING MANAGER STATE
+            if onboardingManager.selectedActionIndices.count == 3 {
                 Button(action: {
                     let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
                     impactFeedback.impactOccurred()
-                    onboardingManager.nextStep()
+                    onboardingManager.nextStep() // PROPERLY NAVIGATE TO NEXT STEP
                 }) {
                     Text("next")
                         .font(.system(size: 24, weight: .light))
                         .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
                         .tracking(-0.3)
                 }
-                .opacity(showContinueButton ? 1.0 : 0.0)
-                .offset(y: showContinueButton ? 0 : 30)
-                .animation(.easeOut(duration: 0.8), value: showContinueButton)
+                .opacity(onboardingManager.selectedActionIndices.count == 3 ? 1.0 : 0.0)
+                .offset(y: onboardingManager.selectedActionIndices.count == 3 ? 0 : 30)
+                .animation(.easeOut(duration: 0.8), value: onboardingManager.selectedActionIndices.count)
             }
         }
         .padding(.horizontal, 30)
@@ -298,17 +305,12 @@ struct ActionsSelectionView: View {
         let impactFeedback = UIImpactFeedbackGenerator(style: .light)
         impactFeedback.impactOccurred()
         
-        // Use onboardingManager's toggle method
+        // USE ONBOARDING MANAGER'S TOGGLE METHOD
         onboardingManager.toggleActionSelection(index)
-        
-        // Update continue button based on selection count
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-            showContinueButton = onboardingManager.selectedActionIndices.count == 3
-        }
     }
     
     private func getTextColor(for index: Int) -> Color {
-        let isSelected = onboardingManager.selectedActionIndices.contains(index)
+        let isSelected = onboardingManager.selectedActionIndices.contains(index) // USE ONBOARDING MANAGER STATE
         
         if index == activeItemIndex {
             return isSelected ?
@@ -324,7 +326,7 @@ struct ActionsSelectionView: View {
     private func getTextOpacity(for index: Int) -> Double {
         if index == activeItemIndex {
             return 1.0
-        } else if onboardingManager.selectedActionIndices.contains(index) {
+        } else if onboardingManager.selectedActionIndices.contains(index) { // USE ONBOARDING MANAGER STATE
             return 0.9
         } else {
             let distance = abs(index - activeItemIndex)
@@ -363,13 +365,10 @@ struct ActionsSelectionView: View {
         withAnimation(.easeOut(duration: 0.6)) {
             animateContent = true
         }
-        
-        // Check if continue button should be shown on load
-        showContinueButton = onboardingManager.selectedActionIndices.count == 3
     }
 }
 
-// MARK: - Supporting Types
+// MARK: - Supporting Types (keeping existing ones)
 struct ActionItem {
     let title: String
     let description: String
