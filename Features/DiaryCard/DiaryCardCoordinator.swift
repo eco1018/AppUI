@@ -2,6 +2,278 @@
 //  DiaryCardCoordinator.swift
 //  AppUI
 //
-//  Created by Ella A. Sadduq on 7/3/25.
+//  Daily diary card flow coordinator
 //
 
+import SwiftUI
+
+// MARK: - Diary Step Enum
+enum DiaryStep: Int, CaseIterable {
+    case emotions = 0
+    case urges = 1
+    case goals = 2
+    case actions = 3
+    case medications = 4
+    case skills = 5
+    case note = 6
+    case completion = 7
+    
+    var title: String {
+        switch self {
+        case .emotions: return "Emotions"
+        case .urges: return "Urges"
+        case .goals: return "Goals"
+        case .actions: return "Actions"
+        case .medications: return "Medications"
+        case .skills: return "Skills"
+        case .note: return "Note"
+        case .completion: return "Complete"
+        }
+    }
+}
+
+// MARK: - Diary Card View Model
+@MainActor
+class DiaryCardViewModel: ObservableObject {
+    @Published var currentStep: DiaryStep = .emotions
+    @Published var isLoading = false
+    @Published var showingDiaryFlow = false
+    
+    // Diary Data
+    @Published var selectedEmotions: Set<String> = []
+    @Published var selectedUrges: Set<String> = []
+    @Published var completedGoals: Set<String> = []
+    @Published var performedActions: Set<String> = []
+    @Published var tookMedications = false
+    @Published var usedSkills: Set<String> = []
+    @Published var noteText = ""
+    
+    // MARK: - Navigation Methods
+    func startDiaryCard() {
+        // Reset diary data for new entry
+        resetDiaryData()
+        withAnimation(.easeInOut(duration: 0.3)) {
+            showingDiaryFlow = true
+            currentStep = .emotions
+        }
+    }
+    
+    func goToNext() {
+        guard let nextStep = DiaryStep(rawValue: currentStep.rawValue + 1) else {
+            // We're at the last step, complete diary
+            completeDiaryCard()
+            return
+        }
+        
+        withAnimation(.easeInOut(duration: 0.3)) {
+            currentStep = nextStep
+        }
+    }
+    
+    func goToPrevious() {
+        guard let previousStep = DiaryStep(rawValue: currentStep.rawValue - 1) else {
+            // Go back to main diary view
+            withAnimation(.easeInOut(duration: 0.3)) {
+                showingDiaryFlow = false
+            }
+            return
+        }
+        
+        withAnimation(.easeInOut(duration: 0.3)) {
+            currentStep = previousStep
+        }
+    }
+    
+    func completeDiaryCard() {
+        isLoading = true
+        
+        // Simulate saving diary entry
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            self.isLoading = false
+            // Return to main diary view
+            withAnimation(.easeInOut(duration: 0.3)) {
+                self.showingDiaryFlow = false
+            }
+        }
+    }
+    
+    // MARK: - Helper Methods
+    private func resetDiaryData() {
+        selectedEmotions.removeAll()
+        selectedUrges.removeAll()
+        completedGoals.removeAll()
+        performedActions.removeAll()
+        tookMedications = false
+        usedSkills.removeAll()
+        noteText = ""
+    }
+    
+    // MARK: - Progress Calculation
+    var progressPercentage: Double {
+        let totalSteps = DiaryStep.allCases.count - 1 // Exclude completion step
+        let currentStepValue = min(currentStep.rawValue, totalSteps - 1)
+        return Double(currentStepValue) / Double(totalSteps - 1)
+    }
+}
+
+// MARK: - Diary Card Coordinator View
+struct DiaryCardCoordinator: View {
+    @StateObject private var diaryViewModel = DiaryCardViewModel()
+    
+    var body: some View {
+        ZStack {
+            if diaryViewModel.showingDiaryFlow {
+                // Full-screen diary flow
+                diaryFlowContent
+            } else {
+                // Main diary dashboard
+                diaryDashboard
+            }
+        }
+        .animation(.easeInOut(duration: 0.3), value: diaryViewModel.showingDiaryFlow)
+    }
+    
+    // MARK: - Diary Dashboard (Main View)
+    private var diaryDashboard: some View {
+        ZStack {
+            // Background
+            LinearGradient(
+                colors: [
+                    Color(red: 0.99, green: 0.99, blue: 1.0),
+                    Color(red: 0.97, green: 0.97, blue: 0.99),
+                    Color(red: 0.95, green: 0.95, blue: 0.98)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
+            VStack(spacing: 40) {
+                // Header
+                VStack(spacing: 20) {
+                    Text("Daily Diary Card")
+                        .font(.system(size: 42, weight: .ultraLight))
+                        .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
+                        .tracking(-1)
+                    
+                    Text("Track your emotions, goals, and progress")
+                        .font(.system(size: 16, weight: .light))
+                        .foregroundColor(Color(red: 0.4, green: 0.4, blue: 0.45))
+                        .multilineTextAlignment(.center)
+                }
+                
+                Spacer()
+                
+                // Start Button
+                Button(action: {
+                    diaryViewModel.startDiaryCard()
+                }) {
+                    Text("Start Today's Entry")
+                        .font(.system(size: 20, weight: .medium))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color(red: 0.15, green: 0.15, blue: 0.2))
+                        )
+                }
+                .padding(.horizontal, 30)
+                
+                Spacer()
+            }
+            .padding(.top, 60)
+        }
+    }
+    
+    // MARK: - Diary Flow Content
+    private var diaryFlowContent: some View {
+        ZStack {
+            // Background
+            LinearGradient(
+                colors: [
+                    Color(red: 0.99, green: 0.99, blue: 1.0),
+                    Color(red: 0.97, green: 0.97, blue: 0.99),
+                    Color(red: 0.95, green: 0.95, blue: 0.98)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                // Progress Bar Section
+                progressBarSection
+                
+                // Content based on current step
+                switch diaryViewModel.currentStep {
+                case .emotions:
+                    DiaryEmotions()
+                        .environmentObject(diaryViewModel)
+                case .urges:
+                    DiaryUrgesView()
+                        .environmentObject(diaryViewModel)
+                case .goals:
+                    DiaryGoals()
+                        .environmentObject(diaryViewModel)
+                case .actions:
+                    DiaryActionsView()
+                        .environmentObject(diaryViewModel)
+                case .medications:
+                    DiaryMedications()
+                        .environmentObject(diaryViewModel)
+                case .skills:
+                    DiarySkills()
+                        .environmentObject(diaryViewModel)
+                case .note:
+                    DiaryNote()
+                        .environmentObject(diaryViewModel)
+                case .completion:
+                    DiaryCompletion()
+                        .environmentObject(diaryViewModel)
+                }
+            }
+        }
+    }
+    
+    // MARK: - Progress Bar Section
+    private var progressBarSection: some View {
+        VStack(spacing: 0) {
+            // Progress Bar
+            HStack {
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        // Background track
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(Color(red: 0.9, green: 0.9, blue: 0.92))
+                            .frame(height: 4)
+                        
+                        // Progress fill
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(Color(red: 0.15, green: 0.15, blue: 0.2))
+                            .frame(width: geometry.size.width * diaryViewModel.progressPercentage, height: 4)
+                            .animation(.easeInOut(duration: 0.3), value: diaryViewModel.progressPercentage)
+                    }
+                }
+                .frame(height: 4)
+            }
+            .padding(.horizontal, 30)
+            .padding(.top, 50)
+            .padding(.bottom, 20)
+            
+            // Step indicator (hidden on completion step)
+            if diaryViewModel.currentStep != .completion {
+                HStack {
+                    Text("Step \(diaryViewModel.currentStep.rawValue + 1) of \(DiaryStep.allCases.count - 1)")
+                        .font(.system(size: 12, weight: .light))
+                        .foregroundColor(Color(red: 0.5, green: 0.5, blue: 0.55))
+                    
+                    Spacer()
+                }
+                .padding(.horizontal, 30)
+                .padding(.bottom, 10)
+                .opacity(0.7)
+            }
+        }
+    }
+}

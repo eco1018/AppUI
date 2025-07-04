@@ -1,6 +1,5 @@
 
 //
-//
 //  RootView.swift
 //  AppUI
 //
@@ -28,10 +27,17 @@ class RootViewModel: ObservableObject {
     }
     
     private func determineInitialState() {
-        // For now, we'll start with authentication after a brief loading period
-        // Later this will check UserDefaults/Keychain for saved state
+        // Check if onboarding was completed
+        let onboardingComplete = UserDefaults.standard.bool(forKey: "onboarding_complete")
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            self.appState = .authentication
+            if onboardingComplete {
+                // Skip to main app if onboarding was completed
+                self.appState = .mainApp
+            } else {
+                // Start with authentication
+                self.appState = .authentication
+            }
             self.isLoading = false
         }
     }
@@ -45,6 +51,8 @@ class RootViewModel: ObservableObject {
     }
     
     func logout() {
+        // Clear onboarding completion flag on logout
+        UserDefaults.standard.set(false, forKey: "onboarding_complete")
         appState = .authentication
     }
 }
@@ -66,8 +74,9 @@ struct RootView: View {
                         rootViewModel.completeAuthentication()
                     })
                 case .onboarding:
-                    OnboardingCoordinatorView()
-                        .environmentObject(rootViewModel)
+                    OnboardingCoordinator(onOnboardingComplete: {
+                        rootViewModel.completeOnboarding()
+                    })
                 case .mainApp:
                     MainAppCoordinatorView()
                         .environmentObject(rootViewModel)
@@ -107,54 +116,7 @@ struct LoadingView: View {
     }
 }
 
-// MARK: - Temporary Coordinator Views (we'll replace these in later steps)
-struct OnboardingCoordinatorView: View {
-    @EnvironmentObject var rootViewModel: RootViewModel
-    
-    var body: some View {
-        ZStack {
-            // Matching background
-            LinearGradient(
-                colors: [
-                    Color(red: 0.99, green: 0.99, blue: 1.0),
-                    Color(red: 0.97, green: 0.97, blue: 0.99),
-                    Color(red: 0.95, green: 0.95, blue: 0.98)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-            
-            VStack(spacing: 40) {
-                Text("Onboarding")
-                    .font(.system(size: 42, weight: .ultraLight))
-                    .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
-                    .tracking(-1)
-                
-                Text("Set up your preferences")
-                    .font(.system(size: 16, weight: .light))
-                    .foregroundColor(Color(red: 0.4, green: 0.4, blue: 0.45))
-                
-                Button("Complete Onboarding (Temporary)") {
-                    rootViewModel.completeOnboarding()
-                }
-                .font(.system(size: 20, weight: .light))
-                .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
-                .padding(.vertical, 16)
-                .padding(.horizontal, 32)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(red: 0.96, green: 0.96, blue: 0.97))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color(red: 0.9, green: 0.9, blue: 0.92), lineWidth: 1)
-                        )
-                )
-            }
-        }
-    }
-}
-
+// MARK: - Main App Coordinator (placeholder coordinators remain)
 struct MainAppCoordinatorView: View {
     @EnvironmentObject var rootViewModel: RootViewModel
     

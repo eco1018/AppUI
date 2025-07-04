@@ -1,22 +1,31 @@
 
+//
 //  DiaryCompletion.swift
 //  AppUI
 //
-//  Simple completion success view
+//  Diary completion with coordinator integration
 //
 
 import SwiftUI
 
 struct DiaryCompletion: View {
+    @EnvironmentObject var diaryViewModel: DiaryCardViewModel
     @State private var animateContent = false
     @State private var showContinueButton = false
-    @State private var progressValue: Double = 0
     
     var body: some View {
         ZStack {
-            // Simple white background
-            Color.white
-                .ignoresSafeArea()
+            // Background matching app style
+            LinearGradient(
+                colors: [
+                    Color(red: 0.99, green: 0.99, blue: 1.0),
+                    Color(red: 0.97, green: 0.97, blue: 0.99),
+                    Color(red: 0.95, green: 0.95, blue: 0.98)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
             
             VStack(spacing: 0) {
                 Spacer()
@@ -49,12 +58,21 @@ struct DiaryCompletion: View {
             }
             
             // Success message
-            Text("all set")
-                .font(.system(size: 48, weight: .ultraLight))
-                .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
-                .opacity(animateContent ? 1.0 : 0.0)
-                .offset(y: animateContent ? 0 : 30)
-                .animation(.easeOut(duration: 0.8).delay(1.0), value: animateContent)
+            VStack(spacing: 16) {
+                Text("diary complete")
+                    .font(.system(size: 48, weight: .ultraLight))
+                    .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
+                    .opacity(animateContent ? 1.0 : 0.0)
+                    .offset(y: animateContent ? 0 : 30)
+                    .animation(.easeOut(duration: 0.8).delay(1.0), value: animateContent)
+                
+                Text("Thank you for taking time to reflect")
+                    .font(.system(size: 16, weight: .light))
+                    .foregroundColor(Color(red: 0.4, green: 0.4, blue: 0.45))
+                    .opacity(animateContent ? 1.0 : 0.0)
+                    .offset(y: animateContent ? 0 : 20)
+                    .animation(.easeOut(duration: 0.8).delay(1.2), value: animateContent)
+            }
         }
         .padding(.horizontal, 40)
     }
@@ -75,21 +93,28 @@ struct DiaryCompletion: View {
         Button(action: {
             let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
             impactFeedback.impactOccurred()
-            // Handle continue to main app
+            diaryViewModel.completeDiaryCard()
         }) {
             HStack(spacing: 10) {
-                Text("begin")
-                    .font(.system(size: 17, weight: .medium))
-                    .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
-                
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
+                if diaryViewModel.isLoading {
+                    ProgressView()
+                        .scaleEffect(0.8)
+                        .tint(Color(red: 0.2, green: 0.2, blue: 0.25))
+                } else {
+                    Text("finish")
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
+                    
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
+                }
             }
             .padding(.horizontal, 24)
             .padding(.vertical, 14)
             .background(continueButtonBackground)
         }
+        .disabled(diaryViewModel.isLoading)
         .scaleEffect(showContinueButton ? 1.0 : 0.8)
         .opacity(showContinueButton ? 1.0 : 0.0)
         .animation(.spring(response: 0.5, dampingFraction: 0.6), value: showContinueButton)
@@ -111,11 +136,6 @@ struct DiaryCompletion: View {
             animateContent = true
         }
         
-        // Complete the progress circle (removed since no progress indicator)
-        // withAnimation(.easeInOut(duration: 2.0).delay(0.5)) {
-        //     progressValue = 1.0
-        // }
-        
         // Show continue button after all animations
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
@@ -127,4 +147,5 @@ struct DiaryCompletion: View {
 
 #Preview {
     DiaryCompletion()
+        .environmentObject(DiaryCardViewModel())
 }
