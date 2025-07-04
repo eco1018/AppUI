@@ -3,7 +3,7 @@
 //  OnboardingCoordinator.swift
 //  AppUI
 //
-//  Onboarding flow coordinator
+//  Onboarding flow coordinator with progress tracking
 //
 
 import SwiftUI
@@ -119,8 +119,9 @@ class OnboardingViewModel: ObservableObject {
     
     // MARK: - Progress Calculation
     var progressPercentage: Double {
-        let totalSteps = OnboardingStep.allCases.count - 1 // Exclude success step
-        return Double(currentStep.rawValue) / Double(totalSteps)
+        let totalSteps = OnboardingStep.allCases.count - 1 // Exclude success step from progress
+        let currentStepValue = min(currentStep.rawValue, totalSteps - 1) // Cap at last real step
+        return Double(currentStepValue) / Double(totalSteps - 1)
     }
 }
 
@@ -146,35 +147,82 @@ struct OnboardingCoordinator: View {
             )
             .ignoresSafeArea()
             
-            // Content based on current step
-            switch onboardingViewModel.currentStep {
-            case .firstName:
-                FirstNameView()
-                    .environmentObject(onboardingViewModel)
-            case .lastName:
-                LastNameView()
-                    .environmentObject(onboardingViewModel)
-            case .age:
-                AgeSelectionView()
-                    .environmentObject(onboardingViewModel)
-            case .medications:
-                MedicationsView()
-                    .environmentObject(onboardingViewModel)
-            case .urges:
-                UrgesSelectionView()
-                    .environmentObject(onboardingViewModel)
-            case .goals:
-                GoalsSelectionView()
-                    .environmentObject(onboardingViewModel)
-            case .actions:
-                ActionsSelectionView()
-                    .environmentObject(onboardingViewModel)
-            case .reminder:
-                DiaryCardReminderView()
-                    .environmentObject(onboardingViewModel)
-            case .success:
-                OnboardingSuccessView()
-                    .environmentObject(onboardingViewModel)
+            VStack(spacing: 0) {
+                // Progress Bar Section
+                progressBarSection
+                
+                // Content based on current step
+                switch onboardingViewModel.currentStep {
+                case .firstName:
+                    FirstNameView()
+                        .environmentObject(onboardingViewModel)
+                case .lastName:
+                    LastNameView()
+                        .environmentObject(onboardingViewModel)
+                case .age:
+                    AgeSelectionView()
+                        .environmentObject(onboardingViewModel)
+                case .medications:
+                    MedicationsView()
+                        .environmentObject(onboardingViewModel)
+                case .urges:
+                    UrgesSelectionView()
+                        .environmentObject(onboardingViewModel)
+                case .goals:
+                    GoalsSelectionView()
+                        .environmentObject(onboardingViewModel)
+                case .actions:
+                    ActionsSelectionView()
+                        .environmentObject(onboardingViewModel)
+                case .reminder:
+                    DiaryCardReminderView()
+                        .environmentObject(onboardingViewModel)
+                case .success:
+                    OnboardingSuccessView()
+                        .environmentObject(onboardingViewModel)
+                }
+            }
+        }
+    }
+    
+    // MARK: - Progress Bar Section
+    private var progressBarSection: some View {
+        VStack(spacing: 0) {
+            // Progress Bar
+            HStack {
+                // Progress Track
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        // Background track
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(Color(red: 0.9, green: 0.9, blue: 0.92))
+                            .frame(height: 4)
+                        
+                        // Progress fill
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(Color(red: 0.15, green: 0.15, blue: 0.2))
+                            .frame(width: geometry.size.width * onboardingViewModel.progressPercentage, height: 4)
+                            .animation(.easeInOut(duration: 0.3), value: onboardingViewModel.progressPercentage)
+                    }
+                }
+                .frame(height: 4)
+            }
+            .padding(.horizontal, 30)
+            .padding(.top, 50)
+            .padding(.bottom, 20)
+            
+            // Step indicator (hidden on success step)
+            if onboardingViewModel.currentStep != .success {
+                HStack {
+                    Text("Step \(onboardingViewModel.currentStep.rawValue + 1) of \(OnboardingStep.allCases.count - 1)")
+                        .font(.system(size: 12, weight: .light))
+                        .foregroundColor(Color(red: 0.5, green: 0.5, blue: 0.55))
+                    
+                    Spacer()
+                }
+                .padding(.horizontal, 30)
+                .padding(.bottom, 10)
+                .opacity(0.7)
             }
         }
     }
