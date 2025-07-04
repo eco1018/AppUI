@@ -128,7 +128,7 @@ struct MainAppCoordinatorView: View {
                     Text("Coach")
                 }
             
-            DiaryCardCoordinatorView()
+            DiaryCardCoordinator()
                 .tabItem {
                     Image(systemName: "doc.text")
                     Text("Card")
