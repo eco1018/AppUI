@@ -116,13 +116,13 @@ struct LoadingView: View {
     }
 }
 
-// MARK: - Main App Coordinator (placeholder coordinators remain)
+// MARK: - Main App Coordinator
 struct MainAppCoordinatorView: View {
     @EnvironmentObject var rootViewModel: RootViewModel
     
     var body: some View {
         TabView {
-            CoachCoordinatorView()
+            CoachCoordinator()
                 .tabItem {
                     Image(systemName: "person.circle")
                     Text("Coach")
@@ -134,29 +134,13 @@ struct MainAppCoordinatorView: View {
                     Text("Card")
                 }
             
-            ProfileCoordinatorView()
-                .environmentObject(rootViewModel)
+            ProfileCoordinator()
                 .tabItem {
                     Image(systemName: "person.crop.circle")
                     Text("Profile")
                 }
         }
         .tint(Color(red: 0.15, green: 0.15, blue: 0.2))
-    }
-}
-
-struct CoachCoordinatorView: View {
-    var body: some View {
-        VStack(spacing: 30) {
-            Text("DBT Coach")
-                .font(.system(size: 42, weight: .ultraLight))
-                .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
-                .tracking(-1)
-            
-            Text("Coaching features coming soon")
-                .font(.system(size: 16, weight: .light))
-                .foregroundColor(Color(red: 0.4, green: 0.4, blue: 0.45))
-        }
     }
 }
 

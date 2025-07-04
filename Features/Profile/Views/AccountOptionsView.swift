@@ -107,7 +107,7 @@ struct AccountOptionsView: View {
                 // Navigate to Onboarding Preferences
             }) {
                 HStack {
-                    Text("onboarding preferences")
+                    Text("settings")
                         .font(.system(size: 24, weight: .light))
                         .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
                         .tracking(-0.3)
@@ -126,10 +126,6 @@ struct AccountOptionsView: View {
                 // Navigate to Settings
             }) {
                 HStack {
-                    Text("settings")
-                        .font(.system(size: 24, weight: .light))
-                        .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
-                        .tracking(-0.3)
                     
                     Spacer()
                 }
