@@ -1,3 +1,5 @@
+
+
 //
 //  AppUIApp.swift
 //  AppUI
@@ -25,8 +27,8 @@ struct AppUIApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
+                .modelContainer(sharedModelContainer)
         }
-        .modelContainer(sharedModelContainer)
     }
 }
