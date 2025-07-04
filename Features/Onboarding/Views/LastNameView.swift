@@ -1,10 +1,4 @@
 //
-//  LastNameView.swift
-//  AppUI
-//
-//  Created by Ella A. Sadduq on 5/31/25.
-//
-
 //
 //  LastNameView.swift
 //  AppUI
@@ -15,37 +9,23 @@
 import SwiftUI
 
 struct LastNameView: View {
-    @State private var lastName: String = ""
+    @EnvironmentObject var onboardingViewModel: OnboardingViewModel
     @State private var animateContent = false
     @State private var showContinueButton = false
     @FocusState private var isTextFieldFocused: Bool
     
     var body: some View {
-        ZStack {
-            // Clean gradient background
-            LinearGradient(
-                colors: [
-                    Color(red: 0.99, green: 0.99, blue: 1.0),
-                    Color(red: 0.97, green: 0.97, blue: 0.99),
-                    Color(red: 0.95, green: 0.95, blue: 0.98)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-            
-            VStack(spacing: 0) {
-                headerSection
-                Spacer()
-                nameInputContent
-                Spacer()
-                bottomSection
-            }
+        VStack(spacing: 0) {
+            headerSection
+            Spacer()
+            nameInputContent
+            Spacer()
+            bottomSection
         }
         .onAppear {
             performAppearAnimations()
         }
-        .onChange(of: lastName) { _ in
+        .onChange(of: onboardingViewModel.lastName) { _ in
             updateContinueButton()
         }
         .onTapGesture {
@@ -58,7 +38,7 @@ struct LastNameView: View {
         VStack(spacing: 0) {
             HStack {
                 Button(action: {
-                    // Navigate back
+                    onboardingViewModel.goToPrevious()
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .light))
@@ -87,7 +67,7 @@ struct LastNameView: View {
                 .animation(.easeOut(duration: 0.8).delay(0.2), value: animateContent)
             
             // Clean text input
-            TextField("", text: $lastName)
+            TextField("", text: $onboardingViewModel.lastName)
                 .font(.system(size: 24, weight: .light))
                 .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
                 .multilineTextAlignment(.center)
@@ -108,7 +88,7 @@ struct LastNameView: View {
                     let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
                     impactFeedback.impactOccurred()
                     hideKeyboard()
-                    // Handle continue action
+                    onboardingViewModel.goToNext()
                 }) {
                     Text("continue")
                         .font(.system(size: 24, weight: .light))
@@ -126,7 +106,7 @@ struct LastNameView: View {
     
     // MARK: - Helper Methods
     private func updateContinueButton() {
-        let trimmedName = lastName.trimmingCharacters(in: .whitespaces)
+        let trimmedName = onboardingViewModel.lastName.trimmingCharacters(in: .whitespaces)
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
             showContinueButton = !trimmedName.isEmpty
         }
@@ -151,4 +131,5 @@ struct LastNameView: View {
 
 #Preview {
     LastNameView()
+        .environmentObject(OnboardingViewModel(onOnboardingComplete: {}))
 }

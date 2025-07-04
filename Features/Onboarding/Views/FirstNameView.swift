@@ -1,10 +1,4 @@
 //
-//  FirstNameView.swift
-//  AppUI
-//
-//  Created by Ella A. Sadduq on 5/31/25.
-//
-
 //
 //  FirstNameView.swift
 //  AppUI
@@ -15,37 +9,23 @@
 import SwiftUI
 
 struct FirstNameView: View {
-    @State private var firstName: String = ""
+    @EnvironmentObject var onboardingViewModel: OnboardingViewModel
     @State private var animateContent = false
     @State private var showContinueButton = false
     @FocusState private var isTextFieldFocused: Bool
     
     var body: some View {
-        ZStack {
-            // Clean gradient background
-            LinearGradient(
-                colors: [
-                    Color(red: 0.99, green: 0.99, blue: 1.0),
-                    Color(red: 0.97, green: 0.97, blue: 0.99),
-                    Color(red: 0.95, green: 0.95, blue: 0.98)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-            
-            VStack(spacing: 0) {
-                headerSection
-                Spacer()
-                nameInputContent
-                Spacer()
-                bottomSection
-            }
+        VStack(spacing: 0) {
+            headerSection
+            Spacer()
+            nameInputContent
+            Spacer()
+            bottomSection
         }
         .onAppear {
             performAppearAnimations()
         }
-        .onChange(of: firstName) { _ in
+        .onChange(of: onboardingViewModel.firstName) { _ in
             updateContinueButton()
         }
         .onTapGesture {
@@ -57,13 +37,15 @@ struct FirstNameView: View {
     private var headerSection: some View {
         VStack(spacing: 0) {
             HStack {
+                // Back button (hidden on first step)
                 Button(action: {
-                    // Navigate back
+                    onboardingViewModel.goToPrevious()
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .light))
                         .foregroundColor(Color(red: 0.4, green: 0.4, blue: 0.45))
                 }
+                .opacity(0) // Hidden on first step
                 
                 Spacer()
             }
@@ -87,7 +69,7 @@ struct FirstNameView: View {
                 .animation(.easeOut(duration: 0.8).delay(0.2), value: animateContent)
             
             // Clean text input
-            TextField("", text: $firstName)
+            TextField("", text: $onboardingViewModel.firstName)
                 .font(.system(size: 24, weight: .light))
                 .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
                 .multilineTextAlignment(.center)
@@ -108,7 +90,7 @@ struct FirstNameView: View {
                     let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
                     impactFeedback.impactOccurred()
                     hideKeyboard()
-                    // Handle continue action
+                    onboardingViewModel.goToNext()
                 }) {
                     Text("continue")
                         .font(.system(size: 24, weight: .light))
@@ -126,7 +108,7 @@ struct FirstNameView: View {
     
     // MARK: - Helper Methods
     private func updateContinueButton() {
-        let trimmedName = firstName.trimmingCharacters(in: .whitespaces)
+        let trimmedName = onboardingViewModel.firstName.trimmingCharacters(in: .whitespaces)
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
             showContinueButton = !trimmedName.isEmpty
         }
@@ -151,4 +133,5 @@ struct FirstNameView: View {
 
 #Preview {
     FirstNameView()
+        .environmentObject(OnboardingViewModel(onOnboardingComplete: {}))
 }

@@ -2,13 +2,13 @@
 //  ActionsSelectionView.swift
 //  AppUI
 //
-//  Minimalist actions selection interface
+//  Actions selection with coordinator integration
 //
 
 import SwiftUI
 
 struct ActionsSelectionView: View {
-    @State private var selectedActions: Set<Int> = []
+    @EnvironmentObject var onboardingViewModel: OnboardingViewModel
     @State private var animateContent = false
     @State private var showContinueButton = false
     @State private var activeItemIndex: Int = 0
@@ -49,6 +49,9 @@ struct ActionsSelectionView: View {
         .onAppear {
             performAppearAnimations()
         }
+        .onChange(of: onboardingViewModel.selectedActions) { _ in
+            updateContinueButton()
+        }
     }
     
     // MARK: - Header Section
@@ -56,7 +59,7 @@ struct ActionsSelectionView: View {
         VStack(spacing: 0) {
             HStack {
                 Button(action: {
-                    // Navigate back
+                    onboardingViewModel.goToPrevious()
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .light))
@@ -97,7 +100,7 @@ struct ActionsSelectionView: View {
                 // Selection indicators
                 HStack(spacing: 8) {
                     ForEach(0..<3, id: \.self) { index in
-                        let isSelected = index < selectedActions.count
+                        let isSelected = index < onboardingViewModel.selectedActions.count
                         let circleColor = isSelected ? Color(red: 0.15, green: 0.15, blue: 0.2) : Color(red: 0.75, green: 0.75, blue: 0.77)
                         let scaleEffect: CGFloat = isSelected ? 1.3 : 1.0
                         
@@ -105,7 +108,7 @@ struct ActionsSelectionView: View {
                             .fill(circleColor)
                             .frame(width: 5, height: 5)
                             .scaleEffect(scaleEffect)
-                            .animation(.spring(response: 0.4, dampingFraction: 0.7), value: selectedActions.count)
+                            .animation(.spring(response: 0.4, dampingFraction: 0.7), value: onboardingViewModel.selectedActions.count)
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -142,7 +145,7 @@ struct ActionsSelectionView: View {
     
     private func actionItemView(action: ActionItem, index: Int) -> some View {
         let isActive = index == activeItemIndex
-        let isSelected = selectedActions.contains(index)
+        let isSelected = onboardingViewModel.selectedActions.contains(index)
         let isSelectable = true
         
         return Button(action: {
@@ -180,7 +183,7 @@ struct ActionsSelectionView: View {
     }
     
     private func titleView(action: ActionItem, index: Int, isActive: Bool) -> some View {
-        let isSelected = selectedActions.contains(index)
+        let isSelected = onboardingViewModel.selectedActions.contains(index)
         
         // Size logic: selected items get bigger, active items get biggest
         let fontSize: CGFloat = {
@@ -207,7 +210,7 @@ struct ActionsSelectionView: View {
             .lineLimit(nil)
             .fixedSize(horizontal: false, vertical: true)
             .animation(.interpolatingSpring(stiffness: 200, damping: 20), value: activeItemIndex)
-            .animation(.interpolatingSpring(stiffness: 200, damping: 20), value: selectedActions)
+            .animation(.interpolatingSpring(stiffness: 200, damping: 20), value: onboardingViewModel.selectedActions)
     }
     
     private func descriptionView(action: ActionItem) -> some View {
@@ -270,9 +273,9 @@ struct ActionsSelectionView: View {
                 Button(action: {
                     let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
                     impactFeedback.impactOccurred()
-                    // Handle continue action
+                    onboardingViewModel.goToNext()
                 }) {
-                    Text("next")
+                    Text("continue")
                         .font(.system(size: 24, weight: .light))
                         .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
                         .tracking(-0.3)
@@ -293,24 +296,22 @@ struct ActionsSelectionView: View {
         
         // Allow selection of any item, limit to 3
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-            if selectedActions.contains(index) {
-                selectedActions.remove(index)
-                showContinueButton = false
-            } else if selectedActions.count < 3 {
-                selectedActions.insert(index)
-                if selectedActions.count == 3 {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                        withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
-                            showContinueButton = true
-                        }
-                    }
-                }
+            if onboardingViewModel.selectedActions.contains(index) {
+                onboardingViewModel.selectedActions.remove(index)
+            } else if onboardingViewModel.selectedActions.count < 3 {
+                onboardingViewModel.selectedActions.insert(index)
             }
         }
     }
     
+    private func updateContinueButton() {
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
+            showContinueButton = onboardingViewModel.selectedActions.count == 3
+        }
+    }
+    
     private func getTextColor(for index: Int) -> Color {
-        let isSelected = selectedActions.contains(index)
+        let isSelected = onboardingViewModel.selectedActions.contains(index)
         
         if index == activeItemIndex {
             return isSelected ?
@@ -326,7 +327,7 @@ struct ActionsSelectionView: View {
     private func getTextOpacity(for index: Int) -> Double {
         if index == activeItemIndex {
             return 1.0
-        } else if selectedActions.contains(index) {
+        } else if onboardingViewModel.selectedActions.contains(index) {
             return 0.9
         } else {
             let distance = abs(index - activeItemIndex)
@@ -368,7 +369,7 @@ struct ActionsSelectionView: View {
     }
 }
 
-// MARK: - Supporting Types
+// MARK: - Supporting Types (keep existing ones)
 struct ActionItem {
     let title: String
     let description: String
@@ -394,4 +395,5 @@ struct ActionsScrollOffsetPreferenceKey: PreferenceKey {
 
 #Preview {
     ActionsSelectionView()
+        .environmentObject(OnboardingViewModel(onOnboardingComplete: {}))
 }

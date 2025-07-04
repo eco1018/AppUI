@@ -1,22 +1,32 @@
 
+
+//
 //  OnboardingSuccessView.swift
 //  AppUI
 //
-//  Simple completion success view
+//  Simple completion success view with coordinator integration
 //
 
 import SwiftUI
 
 struct OnboardingSuccessView: View {
+    @EnvironmentObject var onboardingViewModel: OnboardingViewModel
     @State private var animateContent = false
     @State private var showContinueButton = false
-    @State private var progressValue: Double = 0
     
     var body: some View {
         ZStack {
-            // Simple white background
-            Color.white
-                .ignoresSafeArea()
+            // Simple background matching app style
+            LinearGradient(
+                colors: [
+                    Color(red: 0.99, green: 0.99, blue: 1.0),
+                    Color(red: 0.97, green: 0.97, blue: 0.99),
+                    Color(red: 0.95, green: 0.95, blue: 0.98)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
             
             VStack(spacing: 0) {
                 Spacer()
@@ -75,21 +85,28 @@ struct OnboardingSuccessView: View {
         Button(action: {
             let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
             impactFeedback.impactOccurred()
-            // Handle continue to main app
+            onboardingViewModel.completeOnboarding()
         }) {
             HStack(spacing: 10) {
-                Text("begin")
-                    .font(.system(size: 17, weight: .medium))
-                    .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
-                
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
+                if onboardingViewModel.isLoading {
+                    ProgressView()
+                        .scaleEffect(0.8)
+                        .tint(Color(red: 0.2, green: 0.2, blue: 0.25))
+                } else {
+                    Text("begin")
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
+                    
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
+                }
             }
             .padding(.horizontal, 24)
             .padding(.vertical, 14)
             .background(continueButtonBackground)
         }
+        .disabled(onboardingViewModel.isLoading)
         .scaleEffect(showContinueButton ? 1.0 : 0.8)
         .opacity(showContinueButton ? 1.0 : 0.0)
         .animation(.spring(response: 0.5, dampingFraction: 0.6), value: showContinueButton)
@@ -111,11 +128,6 @@ struct OnboardingSuccessView: View {
             animateContent = true
         }
         
-        // Complete the progress circle (removed since no progress indicator)
-        // withAnimation(.easeInOut(duration: 2.0).delay(0.5)) {
-        //     progressValue = 1.0
-        // }
-        
         // Show continue button after all animations
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
@@ -127,4 +139,5 @@ struct OnboardingSuccessView: View {
 
 #Preview {
     OnboardingSuccessView()
+        .environmentObject(OnboardingViewModel(onOnboardingComplete: {}))
 }

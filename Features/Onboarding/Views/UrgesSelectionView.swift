@@ -441,16 +441,17 @@
 //
 //
 //
+//
 //  UrgesSelectionView.swift
 //  AppUI
 //
-//  Enhanced version with smooth scrolling - Optimized for compilation
+//  Enhanced version with coordinator integration
 //
 
 import SwiftUI
 
 struct UrgesSelectionView: View {
-    @State private var selectedUrges: Set<Int> = []
+    @EnvironmentObject var onboardingViewModel: OnboardingViewModel
     @State private var animateContent = false
     @State private var showContinueButton = false
     @State private var activeItemIndex: Int = 0
@@ -490,6 +491,9 @@ struct UrgesSelectionView: View {
         .onAppear {
             performAppearAnimations()
         }
+        .onChange(of: onboardingViewModel.selectedUrges) { _ in
+            updateContinueButton()
+        }
     }
     
     // MARK: - Header Section
@@ -497,7 +501,7 @@ struct UrgesSelectionView: View {
         VStack(spacing: 0) {
             HStack {
                 Button(action: {
-                    // Navigate back
+                    onboardingViewModel.goToPrevious()
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .light))
@@ -538,7 +542,7 @@ struct UrgesSelectionView: View {
                 // Selection indicators
                 HStack(spacing: 8) {
                     ForEach(0..<2, id: \.self) { index in
-                        let isSelected = index < selectedUrges.count
+                        let isSelected = index < onboardingViewModel.selectedUrges.count
                         let circleColor = isSelected ? Color(red: 0.15, green: 0.15, blue: 0.2) : Color(red: 0.75, green: 0.75, blue: 0.77)
                         let scaleEffect: CGFloat = isSelected ? 1.3 : 1.0
                         
@@ -546,7 +550,7 @@ struct UrgesSelectionView: View {
                             .fill(circleColor)
                             .frame(width: 5, height: 5)
                             .scaleEffect(scaleEffect)
-                            .animation(.spring(response: 0.4, dampingFraction: 0.7), value: selectedUrges.count)
+                            .animation(.spring(response: 0.4, dampingFraction: 0.7), value: onboardingViewModel.selectedUrges.count)
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -583,8 +587,8 @@ struct UrgesSelectionView: View {
     
     private func urgeItemView(urge: UrgeItem, index: Int) -> some View {
         let isActive = index == activeItemIndex
-        let isSelected = selectedUrges.contains(index)
-        let isSelectable = true // Make all items selectable
+        let isSelected = onboardingViewModel.selectedUrges.contains(index)
+        let isSelectable = true
         
         return Button(action: {
             handleUrgeSelection(index: index)
@@ -621,9 +625,8 @@ struct UrgesSelectionView: View {
     }
     
     private func titleView(urge: UrgeItem, index: Int, isActive: Bool) -> some View {
-        let isSelected = selectedUrges.contains(index)
+        let isSelected = onboardingViewModel.selectedUrges.contains(index)
         
-        // Size logic: selected items get bigger, active items get biggest
         let fontSize: CGFloat = {
             if isActive {
                 return isSelected ? 44 : 42
@@ -648,7 +651,7 @@ struct UrgesSelectionView: View {
             .lineLimit(nil)
             .fixedSize(horizontal: false, vertical: true)
             .animation(.interpolatingSpring(stiffness: 200, damping: 20), value: activeItemIndex)
-            .animation(.interpolatingSpring(stiffness: 200, damping: 20), value: selectedUrges)
+            .animation(.interpolatingSpring(stiffness: 200, damping: 20), value: onboardingViewModel.selectedUrges)
     }
     
     private func descriptionView(urge: UrgeItem) -> some View {
@@ -667,7 +670,6 @@ struct UrgesSelectionView: View {
     
     private func selectionIndicatorView(index: Int, isSelected: Bool) -> some View {
         ZStack {
-            // Subtle background circle
             Circle()
                 .fill(Color(red: 0.98, green: 0.98, blue: 0.99))
                 .frame(width: 28, height: 28)
@@ -677,7 +679,6 @@ struct UrgesSelectionView: View {
                 )
                 .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 1)
             
-            // Minimalist checkmark
             if isSelected {
                 Image(systemName: "checkmark")
                     .font(.system(size: 11, weight: .medium))
@@ -711,9 +712,9 @@ struct UrgesSelectionView: View {
                 Button(action: {
                     let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
                     impactFeedback.impactOccurred()
-                    // Handle continue
+                    onboardingViewModel.goToNext()
                 }) {
-                    Text("start")
+                    Text("continue")
                         .font(.system(size: 24, weight: .light))
                         .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
                         .tracking(-0.3)
@@ -732,33 +733,30 @@ struct UrgesSelectionView: View {
         let impactFeedback = UIImpactFeedbackGenerator(style: .light)
         impactFeedback.impactOccurred()
         
-        // Allow selection of any item, not just first 4
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-            if selectedUrges.contains(index) {
-                selectedUrges.remove(index)
-                showContinueButton = false
-            } else if selectedUrges.count < 2 {
-                selectedUrges.insert(index)
-                if selectedUrges.count == 2 {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                        withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
-                            showContinueButton = true
-                        }
-                    }
-                }
+            if onboardingViewModel.selectedUrges.contains(index) {
+                onboardingViewModel.selectedUrges.remove(index)
+            } else if onboardingViewModel.selectedUrges.count < 2 {
+                onboardingViewModel.selectedUrges.insert(index)
             }
         }
     }
     
+    private func updateContinueButton() {
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
+            showContinueButton = onboardingViewModel.selectedUrges.count == 2
+        }
+    }
+    
     private func getTextColor(for index: Int) -> Color {
-        let isSelected = selectedUrges.contains(index)
+        let isSelected = onboardingViewModel.selectedUrges.contains(index)
         
         if index == activeItemIndex {
             return isSelected ?
-            Color(red: 0.05, green: 0.05, blue: 0.1) :  // Even darker when both active and selected
+            Color(red: 0.05, green: 0.05, blue: 0.1) :
             Color(red: 0.15, green: 0.15, blue: 0.2)
         } else if isSelected {
-            return Color(red: 0.15, green: 0.15, blue: 0.2)  // Darker for selected items
+            return Color(red: 0.15, green: 0.15, blue: 0.2)
         } else {
             return Color(red: 0.45, green: 0.45, blue: 0.5)
         }
@@ -769,7 +767,7 @@ struct UrgesSelectionView: View {
             return index == activeItemIndex ? 0.7 : 0.4
         } else if index == activeItemIndex {
             return 1.0
-        } else if selectedUrges.contains(index) {
+        } else if onboardingViewModel.selectedUrges.contains(index) {
             return 0.9
         } else {
             let distance = abs(index - activeItemIndex)
@@ -788,10 +786,8 @@ struct UrgesSelectionView: View {
     }
     
     private func updateActiveItem(from preferences: [ScrollOffsetData]) {
-        // Target the center of the visible area where we want the active item
         let targetY: CGFloat = 380
         
-        // Find the item closest to the target center position
         let closest = preferences.min { abs($0.offset - targetY) < abs($1.offset - targetY) }
         
         if let newActiveIndex = closest?.index, newActiveIndex != activeItemIndex {
@@ -811,7 +807,7 @@ struct UrgesSelectionView: View {
     }
 }
 
-// MARK: - Supporting Types
+// MARK: - Supporting Types (keep existing ones)
 struct UrgeItem {
     let title: String
     let description: String
@@ -837,4 +833,5 @@ struct ScrollOffsetPreferenceKey: PreferenceKey {
 
 #Preview {
     UrgesSelectionView()
+        .environmentObject(OnboardingViewModel(onOnboardingComplete: {}))
 }

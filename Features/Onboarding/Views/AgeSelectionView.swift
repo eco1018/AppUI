@@ -1,7 +1,4 @@
 //
-//  AgeSelectionView.swift
-//  AppUI
-//
 //
 //  AgeSelectionView.swift
 //  AppUI
@@ -12,7 +9,7 @@
 import SwiftUI
 
 struct AgeSelectionView: View {
-    @State private var selectedAge: Double = 25
+    @EnvironmentObject var onboardingViewModel: OnboardingViewModel
     @State private var animateContent = false
     @State private var showContinueButton = true
     
@@ -20,26 +17,12 @@ struct AgeSelectionView: View {
     let maxAge: Double = 80
     
     var body: some View {
-        ZStack {
-            // Clean gradient background
-            LinearGradient(
-                colors: [
-                    Color(red: 0.99, green: 0.99, blue: 1.0),
-                    Color(red: 0.97, green: 0.97, blue: 0.99),
-                    Color(red: 0.95, green: 0.95, blue: 0.98)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-            
-            VStack(spacing: 0) {
-                headerSection
-                Spacer()
-                ageSelectionContent
-                Spacer()
-                bottomSection
-            }
+        VStack(spacing: 0) {
+            headerSection
+            Spacer()
+            ageSelectionContent
+            Spacer()
+            bottomSection
         }
         .onAppear {
             performAppearAnimations()
@@ -51,7 +34,7 @@ struct AgeSelectionView: View {
         VStack(spacing: 0) {
             HStack {
                 Button(action: {
-                    // Navigate back
+                    onboardingViewModel.goToPrevious()
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .light))
@@ -99,7 +82,7 @@ struct AgeSelectionView: View {
         VStack(spacing: 40) {
             // Current age display
             VStack(spacing: 8) {
-                Text("\(Int(selectedAge))")
+                Text("\(Int(onboardingViewModel.age))")
                     .font(.system(size: 64, weight: .ultraLight))
                     .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
                     .opacity(animateContent ? 1.0 : 0.0)
@@ -116,22 +99,21 @@ struct AgeSelectionView: View {
             
             // Custom slider with curved line effect
             VStack(spacing: 20) {
-                VStack(spacing: 8) { // Reduced spacing to bring circle closer to line
+                VStack(spacing: 8) {
                     // Curved track that creates a mound at the current position
                     ZStack {
-                        // Curved line that creates the mound effect (no background line)
-                        CurvedSliderShape(progress: CGFloat((selectedAge - minAge) / (maxAge - minAge)))
+                        CurvedSliderShape(progress: CGFloat((onboardingViewModel.age - minAge) / (maxAge - minAge)))
                             .stroke(Color(red: 0.15, green: 0.15, blue: 0.2), lineWidth: 2.5)
                             .opacity(animateContent ? 1.0 : 0.0)
                             .animation(.easeOut(duration: 0.8).delay(1.0), value: animateContent)
-                            .animation(.easeInOut(duration: 0.3), value: selectedAge)
+                            .animation(.easeInOut(duration: 0.3), value: onboardingViewModel.age)
                     }
-                    .frame(height: 30) // Increased height to accommodate the curve
+                    .frame(height: 30)
                     
                     // Slider thumb positioned below the track
                     HStack {
                         Spacer()
-                            .frame(width: sliderWidth * CGFloat((selectedAge - minAge) / (maxAge - minAge)) - 12)
+                            .frame(width: sliderWidth * CGFloat((onboardingViewModel.age - minAge) / (maxAge - minAge)) - 12)
                         
                         Circle()
                             .fill(Color(red: 0.15, green: 0.15, blue: 0.2))
@@ -149,15 +131,14 @@ struct AgeSelectionView: View {
                     DragGesture(minimumDistance: 0)
                         .onChanged { value in
                             let newValue = min(max(minAge, minAge + (maxAge - minAge) * Double(value.location.x / sliderWidth)), maxAge)
-                            selectedAge = newValue
+                            onboardingViewModel.age = newValue
                             
-                            // Haptic feedback on value change
                             let impactFeedback = UIImpactFeedbackGenerator(style: .light)
                             impactFeedback.impactOccurred()
                         }
                 )
             }
-            .padding(.horizontal, 0) // No padding - full edge-to-edge
+            .padding(.horizontal, 0)
         }
     }
     
@@ -168,7 +149,7 @@ struct AgeSelectionView: View {
                 Button(action: {
                     let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
                     impactFeedback.impactOccurred()
-                    // Handle continue action
+                    onboardingViewModel.goToNext()
                 }) {
                     Text("continue")
                         .font(.system(size: 24, weight: .light))
@@ -186,7 +167,7 @@ struct AgeSelectionView: View {
     
     // MARK: - Helper Properties
     private var sliderWidth: CGFloat {
-        UIScreen.main.bounds.width // Full screen width, no padding
+        UIScreen.main.bounds.width
     }
     
     private func performAppearAnimations() {
@@ -206,25 +187,20 @@ struct CurvedSliderShape: Shape {
         let width = rect.width
         let height = rect.height
         let centerY = height / 2
-        let peakHeight: CGFloat = 10 // Reduced height of the curve peak
-        let curveWidth: CGFloat = width * 0.3 // Width of the curve area
+        let peakHeight: CGFloat = 10
+        let curveWidth: CGFloat = width * 0.3
         
-        // Calculate the X position of the peak based on progress
         let peakX = width * progress
         
-        // Start from the left
         path.move(to: CGPoint(x: 0, y: centerY))
         
-        // Create points for the curve
         let numPoints = 100
         for i in 0...numPoints {
             let x = (CGFloat(i) / CGFloat(numPoints)) * width
             
-            // Calculate the curve effect - creates a bell curve centered at peakX
             let distanceFromPeak = abs(x - peakX)
             let normalizedDistance = min(distanceFromPeak / (curveWidth / 2), 1.0)
             
-            // Use a smooth curve function (inverted cosine for bell shape)
             let curveEffect = cos(normalizedDistance * .pi / 2)
             let y = centerY - (peakHeight * max(0, curveEffect))
             
@@ -241,4 +217,5 @@ struct CurvedSliderShape: Shape {
 
 #Preview {
     AgeSelectionView()
+        .environmentObject(OnboardingViewModel(onOnboardingComplete: {}))
 }

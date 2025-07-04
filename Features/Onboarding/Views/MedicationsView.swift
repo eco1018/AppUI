@@ -1,6 +1,4 @@
 //
-//  MedicationsView.swift
-//  AppUI
 //
 //  MedicationsView.swift
 //  AppUI
@@ -11,34 +9,23 @@
 import SwiftUI
 
 struct MedicationsView: View {
-    @State private var selectedOption: String? = nil
+    @EnvironmentObject var onboardingViewModel: OnboardingViewModel
     @State private var animateContent = false
     @State private var showContinueButton = false
     
     var body: some View {
-        ZStack {
-            // Clean gradient background
-            LinearGradient(
-                colors: [
-                    Color(red: 0.99, green: 0.99, blue: 1.0),
-                    Color(red: 0.97, green: 0.97, blue: 0.99),
-                    Color(red: 0.95, green: 0.95, blue: 0.98)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-            
-            VStack(spacing: 0) {
-                headerSection
-                Spacer()
-                medicationSelectionContent
-                Spacer()
-                bottomSection
-            }
+        VStack(spacing: 0) {
+            headerSection
+            Spacer()
+            medicationSelectionContent
+            Spacer()
+            bottomSection
         }
         .onAppear {
             performAppearAnimations()
+        }
+        .onChange(of: onboardingViewModel.selectedMedication) { _ in
+            updateContinueButton()
         }
     }
     
@@ -47,7 +34,7 @@ struct MedicationsView: View {
         VStack(spacing: 0) {
             HStack {
                 Button(action: {
-                    // Navigate back
+                    onboardingViewModel.goToPrevious()
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .light))
@@ -93,18 +80,17 @@ struct MedicationsView: View {
     // MARK: - Medication Selection Content (Centered)
     private var medicationSelectionContent: some View {
         VStack(spacing: 40) {
-            
             // Clean text options
             VStack(spacing: 40) {
                 // Yes option
                 Button(action: {
-                    selectOption("Yes")
+                    selectOption("yes")
                 }) {
                     Text("yes")
                         .font(.system(size: 24, weight: .light))
-                        .foregroundColor(selectedOption == "Yes" ? Color(red: 0.15, green: 0.15, blue: 0.2) : Color(red: 0.5, green: 0.5, blue: 0.55))
-                        .scaleEffect(selectedOption == "Yes" ? 1.05 : 1.0)
-                        .animation(.easeInOut(duration: 0.2), value: selectedOption)
+                        .foregroundColor(onboardingViewModel.selectedMedication == "yes" ? Color(red: 0.15, green: 0.15, blue: 0.2) : Color(red: 0.5, green: 0.5, blue: 0.55))
+                        .scaleEffect(onboardingViewModel.selectedMedication == "yes" ? 1.05 : 1.0)
+                        .animation(.easeInOut(duration: 0.2), value: onboardingViewModel.selectedMedication)
                 }
                 .opacity(animateContent ? 1.0 : 0.0)
                 .offset(y: animateContent ? 0 : 20)
@@ -112,13 +98,13 @@ struct MedicationsView: View {
                 
                 // No option
                 Button(action: {
-                    selectOption("No")
+                    selectOption("no")
                 }) {
                     Text("no")
                         .font(.system(size: 24, weight: .light))
-                        .foregroundColor(selectedOption == "No" ? Color(red: 0.15, green: 0.15, blue: 0.2) : Color(red: 0.5, green: 0.5, blue: 0.55))
-                        .scaleEffect(selectedOption == "No" ? 1.05 : 1.0)
-                        .animation(.easeInOut(duration: 0.2), value: selectedOption)
+                        .foregroundColor(onboardingViewModel.selectedMedication == "no" ? Color(red: 0.15, green: 0.15, blue: 0.2) : Color(red: 0.5, green: 0.5, blue: 0.55))
+                        .scaleEffect(onboardingViewModel.selectedMedication == "no" ? 1.05 : 1.0)
+                        .animation(.easeInOut(duration: 0.2), value: onboardingViewModel.selectedMedication)
                 }
                 .opacity(animateContent ? 1.0 : 0.0)
                 .offset(y: animateContent ? 0 : 20)
@@ -135,7 +121,7 @@ struct MedicationsView: View {
                 Button(action: {
                     let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
                     impactFeedback.impactOccurred()
-                    // Handle continue action
+                    onboardingViewModel.goToNext()
                 }) {
                     Text("continue")
                         .font(.system(size: 24, weight: .light))
@@ -157,8 +143,13 @@ struct MedicationsView: View {
         impactFeedback.impactOccurred()
         
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-            selectedOption = option
-            showContinueButton = true
+            onboardingViewModel.selectedMedication = option
+        }
+    }
+    
+    private func updateContinueButton() {
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+            showContinueButton = !onboardingViewModel.selectedMedication.isEmpty
         }
     }
     
@@ -171,4 +162,5 @@ struct MedicationsView: View {
 
 #Preview {
     MedicationsView()
+        .environmentObject(OnboardingViewModel(onOnboardingComplete: {}))
 }
