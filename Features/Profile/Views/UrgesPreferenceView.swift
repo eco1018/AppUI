@@ -60,7 +60,7 @@ struct UrgesPreferenceView: View {
         VStack(spacing: 0) {
             HStack {
                 Button(action: {
-                    profileViewModel.showOnboardingPreferences() // Updated navigation
+                    profileViewModel.goBack() // ✅ ADD - same for every view
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .light))
