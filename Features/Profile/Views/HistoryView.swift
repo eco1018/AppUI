@@ -51,7 +51,7 @@ struct HistoryView: View {
         VStack(spacing: 0) {
             HStack {
                 Button(action: {
-                    profileViewModel.showMain() // Updated navigation
+                    profileViewModel.goBack() // ✅ CHANGED: Use generic back instead of showMain()
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .light))

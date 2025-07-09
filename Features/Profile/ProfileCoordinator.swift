@@ -4,131 +4,10 @@
 //  ProfileCoordinator.swift
 //  AppUI
 //
-//  Profile feature coordinator - Step 2: Connected actual preference views
+//  Profile feature coordinator
 //
 
 import SwiftUI
-
-// MARK: - Profile Flow Enum (updated with missing cases)
-enum ProfileFlow {
-    case main
-    case menu
-    case history
-    case settings
-    case account                    // Added
-    case onboardingPreferences      // Added
-    case namePreference
-    case agePreference
-    case goalsPreference
-    case urgesPreference
-    case actionsPreference
-    case medicationsPreference
-    case reminderPreference         // Added
-    case notificationSettings
-}
-
-// MARK: - Profile View Model
-@MainActor
-class ProfileViewModel: ObservableObject {
-    @Published var currentFlow: ProfileFlow = .main
-    @Published var isLoading = false
-    
-    // Navigation
-    var onLogout: (() -> Void)?
-    
-    init(onLogout: @escaping () -> Void) {
-        self.onLogout = onLogout
-    }
-    
-    // MARK: - Navigation Methods
-    func showMenu() {
-        withAnimation(.easeInOut(duration: 0.3)) {
-            currentFlow = .menu
-        }
-    }
-    
-    func showMain() {
-        withAnimation(.easeInOut(duration: 0.3)) {
-            currentFlow = .main
-        }
-    }
-    
-    func showHistory() {
-        withAnimation(.easeInOut(duration: 0.3)) {
-            currentFlow = .history
-        }
-    }
-    
-    func showSettings() {
-        withAnimation(.easeInOut(duration: 0.3)) {
-            currentFlow = .settings
-        }
-    }
-    
-    func showAccount() {
-        withAnimation(.easeInOut(duration: 0.3)) {
-            currentFlow = .account
-        }
-    }
-    
-    func showOnboardingPreferences() {
-        withAnimation(.easeInOut(duration: 0.3)) {
-            currentFlow = .onboardingPreferences
-        }
-    }
-    
-    func showNamePreference() {
-        withAnimation(.easeInOut(duration: 0.3)) {
-            currentFlow = .namePreference
-        }
-    }
-    
-    func showAgePreference() {
-        withAnimation(.easeInOut(duration: 0.3)) {
-            currentFlow = .agePreference
-        }
-    }
-    
-    func showGoalsPreference() {
-        withAnimation(.easeInOut(duration: 0.3)) {
-            currentFlow = .goalsPreference
-        }
-    }
-    
-    func showUrgesPreference() {
-        withAnimation(.easeInOut(duration: 0.3)) {
-            currentFlow = .urgesPreference
-        }
-    }
-    
-    func showActionsPreference() {
-        withAnimation(.easeInOut(duration: 0.3)) {
-            currentFlow = .actionsPreference
-        }
-    }
-    
-    func showMedicationsPreference() {
-        withAnimation(.easeInOut(duration: 0.3)) {
-            currentFlow = .medicationsPreference
-        }
-    }
-    
-    func showReminderPreference() {
-        withAnimation(.easeInOut(duration: 0.3)) {
-            currentFlow = .reminderPreference
-        }
-    }
-    
-    func showNotificationSettings() {
-        withAnimation(.easeInOut(duration: 0.3)) {
-            currentFlow = .notificationSettings
-        }
-    }
-    
-    func logout() {
-        onLogout?()
-    }
-}
 
 // MARK: - Profile Coordinator View
 struct ProfileCoordinator: View {
@@ -193,24 +72,8 @@ struct ProfileCoordinator: View {
                     .environmentObject(profileViewModel)
                 
             case .settings:
-                // Placeholder for settings view
-                VStack {
-                    Text("Settings")
-                        .font(.system(size: 32, weight: .light))
-                        .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
-                    
-                    Button("Preferences") {
-                        profileViewModel.showOnboardingPreferences()
-                    }
-                    
-                    Button("Notifications") {
-                        profileViewModel.showNotificationSettings()
-                    }
-                    
-                    Button("Back") {
-                        profileViewModel.showMenu()
-                    }
-                }
+                SettingsView()
+                    .environmentObject(profileViewModel)
                 
             case .account:
                 AccountOptionsView()
@@ -225,16 +88,8 @@ struct ProfileCoordinator: View {
                     .environmentObject(profileViewModel)
                 
             case .agePreference:
-                // Placeholder for age preference view (exists but empty)
-                VStack {
-                    Text("Age Preference")
-                        .font(.system(size: 32, weight: .light))
-                        .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
-                    
-                    Button("Back") {
-                        profileViewModel.showOnboardingPreferences()
-                    }
-                }
+                AgePreferenceView()
+                    .environmentObject(profileViewModel)
                 
             case .goalsPreference:
                 GoalsPreferenceView()
