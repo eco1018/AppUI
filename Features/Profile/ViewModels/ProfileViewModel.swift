@@ -1,5 +1,6 @@
 //
 //
+//
 //  ProfileViewModel.swift
 //  AppUI
 //
@@ -14,7 +15,7 @@ enum ProfileFlow {
     case menu
     case history
     case settings
-    case account
+    // REMOVED: case account
     case onboardingPreferences
     case namePreference
     case agePreference
@@ -87,9 +88,7 @@ class ProfileViewModel: ObservableObject {
         pushToStack(.settings)
     }
     
-    func showAccount() {
-        pushToStack(.account)
-    }
+    // REMOVED: showAccount() method
     
     func showOnboardingPreferences() {
         pushToStack(.onboardingPreferences)

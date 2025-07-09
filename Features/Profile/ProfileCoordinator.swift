@@ -1,6 +1,7 @@
 
 //
 //
+//
 //  ProfileCoordinator.swift
 //  AppUI
 //
@@ -40,32 +41,8 @@ struct ProfileCoordinator: View {
                 .environmentObject(profileViewModel)
                 
             case .menu:
-                // Placeholder for menu view
-                VStack(spacing: 30) {
-                    Text("Menu")
-                        .font(.system(size: 32, weight: .light))
-                        .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
-                    
-                    Button("History") {
-                        profileViewModel.showHistory()
-                    }
-                    
-                    Button("Settings") {
-                        profileViewModel.showSettings()
-                    }
-                    
-                    Button("Account") {
-                        profileViewModel.showAccount()
-                    }
-                    
-                    Button("Logout") {
-                        profileViewModel.logout()
-                    }
-                    
-                    Button("Back to Profile") {
-                        profileViewModel.showMain()
-                    }
-                }
+                MenuView()
+                    .environmentObject(profileViewModel)
                 
             case .history:
                 HistoryView()
@@ -73,10 +50,6 @@ struct ProfileCoordinator: View {
                 
             case .settings:
                 SettingsView()
-                    .environmentObject(profileViewModel)
-                
-            case .account:
-                AccountOptionsView()
                     .environmentObject(profileViewModel)
                 
             case .onboardingPreferences:
