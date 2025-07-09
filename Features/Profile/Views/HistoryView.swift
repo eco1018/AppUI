@@ -1,16 +1,18 @@
+
+//
 //
 //  HistoryView.swift
 //  AppUI
 //
-//  History view for displaying past diary card entries
+//  History view for displaying past diary card entries - Updated with ProfileViewModel navigation
 //
 
 import SwiftUI
 
 // MARK: - History View
 struct HistoryView: View {
+    @EnvironmentObject var profileViewModel: ProfileViewModel  // Added
     @State private var animateContent = false
-    @EnvironmentObject var profileViewModel: ProfileViewModel
     
     // Sample diary entries (this would come from your data layer later)
     let sampleEntries = [
@@ -49,7 +51,7 @@ struct HistoryView: View {
         VStack(spacing: 0) {
             HStack {
                 Button(action: {
-                    profileViewModel.showMain()
+                    profileViewModel.showMain() // Updated navigation
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .light))

@@ -4,23 +4,26 @@
 //  ProfileCoordinator.swift
 //  AppUI
 //
-//  Profile feature coordinator - Step 1: Basic structure with MainProfileView
+//  Profile feature coordinator - Step 2: Connected actual preference views
 //
 
 import SwiftUI
 
-// MARK: - Profile Flow Enum
+// MARK: - Profile Flow Enum (updated with missing cases)
 enum ProfileFlow {
     case main
     case menu
     case history
     case settings
+    case account                    // Added
+    case onboardingPreferences      // Added
     case namePreference
     case agePreference
     case goalsPreference
     case urgesPreference
     case actionsPreference
     case medicationsPreference
+    case reminderPreference         // Added
     case notificationSettings
 }
 
@@ -37,7 +40,7 @@ class ProfileViewModel: ObservableObject {
         self.onLogout = onLogout
     }
     
-    // MARK: - Navigation Methods (placeholders for now)
+    // MARK: - Navigation Methods
     func showMenu() {
         withAnimation(.easeInOut(duration: 0.3)) {
             currentFlow = .menu
@@ -59,6 +62,66 @@ class ProfileViewModel: ObservableObject {
     func showSettings() {
         withAnimation(.easeInOut(duration: 0.3)) {
             currentFlow = .settings
+        }
+    }
+    
+    func showAccount() {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            currentFlow = .account
+        }
+    }
+    
+    func showOnboardingPreferences() {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            currentFlow = .onboardingPreferences
+        }
+    }
+    
+    func showNamePreference() {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            currentFlow = .namePreference
+        }
+    }
+    
+    func showAgePreference() {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            currentFlow = .agePreference
+        }
+    }
+    
+    func showGoalsPreference() {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            currentFlow = .goalsPreference
+        }
+    }
+    
+    func showUrgesPreference() {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            currentFlow = .urgesPreference
+        }
+    }
+    
+    func showActionsPreference() {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            currentFlow = .actionsPreference
+        }
+    }
+    
+    func showMedicationsPreference() {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            currentFlow = .medicationsPreference
+        }
+    }
+    
+    func showReminderPreference() {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            currentFlow = .reminderPreference
+        }
+    }
+    
+    func showNotificationSettings() {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            currentFlow = .notificationSettings
         }
     }
     
@@ -112,6 +175,10 @@ struct ProfileCoordinator: View {
                         profileViewModel.showSettings()
                     }
                     
+                    Button("Account") {
+                        profileViewModel.showAccount()
+                    }
+                    
                     Button("Logout") {
                         profileViewModel.logout()
                     }
@@ -122,16 +189,8 @@ struct ProfileCoordinator: View {
                 }
                 
             case .history:
-                // Placeholder for history view
-                VStack {
-                    Text("History")
-                        .font(.system(size: 32, weight: .light))
-                        .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
-                    
-                    Button("Back") {
-                        profileViewModel.showMain()
-                    }
-                }
+                HistoryView()
+                    .environmentObject(profileViewModel)
                 
             case .settings:
                 // Placeholder for settings view
@@ -140,22 +199,74 @@ struct ProfileCoordinator: View {
                         .font(.system(size: 32, weight: .light))
                         .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
                     
+                    Button("Preferences") {
+                        profileViewModel.showOnboardingPreferences()
+                    }
+                    
+                    Button("Notifications") {
+                        profileViewModel.showNotificationSettings()
+                    }
+                    
                     Button("Back") {
-                        profileViewModel.showMain()
+                        profileViewModel.showMenu()
                     }
                 }
                 
-            case .namePreference, .agePreference, .goalsPreference, .urgesPreference, .actionsPreference, .medicationsPreference, .notificationSettings:
-                // Placeholder for all preference views
+            case .account:
+                AccountOptionsView()
+                    .environmentObject(profileViewModel)
+                
+            case .onboardingPreferences:
+                OnboardingPreferencesView()
+                    .environmentObject(profileViewModel)
+                
+            case .namePreference:
+                NamePreferenceView()
+                    .environmentObject(profileViewModel)
+                
+            case .agePreference:
+                // Placeholder for age preference view (exists but empty)
                 VStack {
-                    Text("Preference View")
+                    Text("Age Preference")
                         .font(.system(size: 32, weight: .light))
                         .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
                     
-                    Button("Back to Settings") {
-                        profileViewModel.showSettings()
+                    Button("Back") {
+                        profileViewModel.showOnboardingPreferences()
                     }
                 }
+                
+            case .goalsPreference:
+                GoalsPreferenceView()
+                    .environmentObject(profileViewModel)
+                
+            case .urgesPreference:
+                UrgesPreferenceView()
+                    .environmentObject(profileViewModel)
+                
+            case .actionsPreference:
+                ActionsPreferenceView()
+                    .environmentObject(profileViewModel)
+                
+            case .medicationsPreference:
+                MedicationsPreferenceView()
+                    .environmentObject(profileViewModel)
+                
+            case .reminderPreference:
+                // Placeholder for reminder preference view (exists but empty)
+                VStack {
+                    Text("Reminder Preference")
+                        .font(.system(size: 32, weight: .light))
+                        .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
+                    
+                    Button("Back") {
+                        profileViewModel.showOnboardingPreferences()
+                    }
+                }
+                
+            case .notificationSettings:
+                NotificationSettingsView()
+                    .environmentObject(profileViewModel)
             }
         }
     }
@@ -173,18 +284,6 @@ struct MainProfileView: View {
     
     var body: some View {
         ZStack {
-            // Clean gradient background
-            LinearGradient(
-                colors: [
-                    Color(red: 0.99, green: 0.99, blue: 1.0),
-                    Color(red: 0.97, green: 0.97, blue: 0.99),
-                    Color(red: 0.95, green: 0.95, blue: 0.98)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-            
             VStack(spacing: 0) {
                 headerSection
                 Spacer()

@@ -1,20 +1,22 @@
+
 //
+
 //  NotificationSettingsView.swift
 //  AppUI
 //
-//  Notification settings management interface
+//  Notification settings management interface - Updated with ProfileViewModel navigation
 //
 
 import SwiftUI
 
 struct NotificationSettingsView: View {
+    @EnvironmentObject var profileViewModel: ProfileViewModel  // Added
     @State private var animateContent = false
     @State private var dailyReminder = true
     @State private var skillReminders = false
     @State private var progressUpdates = true
     @State private var hasChanges = false
     @State private var originalSettings = (daily: true, skills: false, progress: true)
-    @EnvironmentObject var profileViewModel: ProfileViewModel
     
     var body: some View {
         ZStack {
@@ -47,7 +49,7 @@ struct NotificationSettingsView: View {
         VStack(spacing: 0) {
             HStack {
                 Button(action: {
-                    profileViewModel.showSettings()
+                    profileViewModel.showSettings() // Updated navigation
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .light))

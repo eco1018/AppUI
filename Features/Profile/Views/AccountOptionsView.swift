@@ -1,19 +1,15 @@
 //
-//  AccountOptionsView.swift
-//  AppUI
-//
-//  Created by Ella A. Sadduq on 5/31/25.
-//
 //
 //  AccountOptionsView.swift
 //  AppUI
 //
-//  Minimalist account options interface
+//  Account options interface - Updated with ProfileViewModel navigation
 //
 
 import SwiftUI
 
 struct AccountOptionsView: View {
+    @EnvironmentObject var profileViewModel: ProfileViewModel  // Added
     @State private var animateContent = false
     
     var body: some View {
@@ -48,7 +44,7 @@ struct AccountOptionsView: View {
         VStack(spacing: 0) {
             HStack {
                 Button(action: {
-                    // Navigate back
+                    profileViewModel.showMenu() // Updated navigation
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .light))
@@ -145,7 +141,7 @@ struct AccountOptionsView: View {
             Button(action: {
                 let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
                 impactFeedback.impactOccurred()
-                // Handle log out
+                profileViewModel.logout() // Updated to use ProfileViewModel logout
             }) {
                 Text("log out")
                     .font(.system(size: 24, weight: .light))
@@ -170,4 +166,5 @@ struct AccountOptionsView: View {
 
 #Preview {
     AccountOptionsView()
+        .environmentObject(ProfileViewModel(onLogout: {}))
 }

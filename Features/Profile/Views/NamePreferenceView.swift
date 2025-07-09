@@ -1,21 +1,15 @@
 //
-//  NamePreferenceView.swift
-//  AppUI
-//
-//  Created by Ella A. Sadduq on 5/31/25.
-//
-
-
 //
 //  NamePreferenceView.swift
 //  AppUI
 //
-//  Name preference management interface
+//  Name preference management interface - Updated with ProfileViewModel navigation
 //
 
 import SwiftUI
 
 struct NamePreferenceView: View {
+    @EnvironmentObject var profileViewModel: ProfileViewModel  // Added
     @State private var firstName: String = "Alex" // Pre-filled for demo
     @State private var lastName: String = "Johnson" // Pre-filled for demo
     @State private var animateContent = false
@@ -67,7 +61,7 @@ struct NamePreferenceView: View {
         VStack(spacing: 0) {
             HStack {
                 Button(action: {
-                    // Navigate back
+                    profileViewModel.showOnboardingPreferences() // Updated navigation
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .light))
@@ -254,7 +248,7 @@ struct NamePreferenceView: View {
     private func fieldBorder(isFocused: Bool) -> some View {
         RoundedRectangle(cornerRadius: 12)
             .stroke(
-                isFocused 
+                isFocused
                     ? Color(red: 0.15, green: 0.15, blue: 0.2)
                     : Color(red: 0.9, green: 0.9, blue: 0.92),
                 lineWidth: isFocused ? 1.5 : 1
@@ -315,4 +309,5 @@ struct NamePreferenceView: View {
 
 #Preview {
     NamePreferenceView()
+        .environmentObject(ProfileViewModel(onLogout: {}))
 }

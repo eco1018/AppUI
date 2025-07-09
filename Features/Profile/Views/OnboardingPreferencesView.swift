@@ -1,30 +1,25 @@
 //
-//  OnboardingPreferencesView.swift
-//  AppUI
-//
-//  Created by Ella A. Sadduq on 5/31/25.
-//
-
 //
 //  OnboardingPreferencesView.swift
 //  AppUI
 //
-//  Modern preferences management interface
+//  Preferences management interface - Updated with ProfileViewModel navigation
 //
 
 import SwiftUI
 
 struct OnboardingPreferencesView: View {
+    @EnvironmentObject var profileViewModel: ProfileViewModel  // Added
     @State private var animateContent = false
     
     let preferenceItems = [
-        PreferenceItem(title: "Name", subtitle: "Update your first and last name"),
-        PreferenceItem(title: "Age", subtitle: "Change your age"),
-        PreferenceItem(title: "Medications", subtitle: "Update medication status"),
-        PreferenceItem(title: "Urges", subtitle: "Modify tracked urges (2 selected)"),
-        PreferenceItem(title: "Goals", subtitle: "Update your goals (2 selected)"),
-        PreferenceItem(title: "Actions", subtitle: "Change tracked actions (3 selected)"),
-        PreferenceItem(title: "Reminder", subtitle: "Adjust notification time")
+        PreferenceItem(title: "Name", subtitle: "Update your first and last name", action: { vm in vm.showNamePreference() }),
+        PreferenceItem(title: "Age", subtitle: "Change your age", action: { vm in vm.showAgePreference() }),
+        PreferenceItem(title: "Medications", subtitle: "Update medication status", action: { vm in vm.showMedicationsPreference() }),
+        PreferenceItem(title: "Urges", subtitle: "Modify tracked urges (2 selected)", action: { vm in vm.showUrgesPreference() }),
+        PreferenceItem(title: "Goals", subtitle: "Update your goals (2 selected)", action: { vm in vm.showGoalsPreference() }),
+        PreferenceItem(title: "Actions", subtitle: "Change tracked actions (3 selected)", action: { vm in vm.showActionsPreference() }),
+        PreferenceItem(title: "Reminder", subtitle: "Adjust notification time", action: { vm in vm.showReminderPreference() })
     ]
     
     var body: some View {
@@ -56,7 +51,7 @@ struct OnboardingPreferencesView: View {
         VStack(spacing: 0) {
             HStack {
                 Button(action: {
-                    // Navigate back
+                    profileViewModel.showSettings() // Updated navigation
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .light))
@@ -117,7 +112,7 @@ struct OnboardingPreferencesView: View {
         Button(action: {
             let impactFeedback = UIImpactFeedbackGenerator(style: .light)
             impactFeedback.impactOccurred()
-            // Handle navigation to specific preference
+            item.action(profileViewModel) // Updated to use ProfileViewModel
         }) {
             HStack(spacing: 20) {
                 // Content
@@ -176,8 +171,10 @@ struct OnboardingPreferencesView: View {
 struct PreferenceItem {
     let title: String
     let subtitle: String
+    let action: (ProfileViewModel) -> Void  // Updated to accept ProfileViewModel
 }
 
 #Preview {
     OnboardingPreferencesView()
+        .environmentObject(ProfileViewModel(onLogout: {}))
 }

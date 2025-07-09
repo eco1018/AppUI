@@ -1,20 +1,15 @@
 //
-//  MedicationsPreferenceView.swift
-//  AppUI
-//
-//  Created by Ella A. Sadduq on 5/31/25.
-//
-
 //
 //  MedicationsPreferenceView.swift
 //  AppUI
 //
-//  Minimalist medications preference management interface
+//  Medications preference management interface - Updated with ProfileViewModel navigation
 //
 
 import SwiftUI
 
 struct MedicationsPreferenceView: View {
+    @EnvironmentObject var profileViewModel: ProfileViewModel  // Added
     @State private var selectedMedications: Set<Int> = [0] // Pre-selected medications for demo
     @State private var animateContent = false
     @State private var hasChanges = false
@@ -58,7 +53,7 @@ struct MedicationsPreferenceView: View {
         VStack(spacing: 0) {
             HStack {
                 Button(action: {
-                    // Navigate back
+                    profileViewModel.showOnboardingPreferences() // Updated navigation
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .light))
@@ -233,4 +228,5 @@ struct MedicationsPreferenceView: View {
 
 #Preview {
     MedicationsPreferenceView()
+        .environmentObject(ProfileViewModel(onLogout: {}))
 }

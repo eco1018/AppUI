@@ -1,20 +1,15 @@
 //
-//  ActionsPreferenceView.swift
-//  AppUI
-//
-//  Created by Ella A. Sadduq on 5/31/25.
-//
-
 //
 //  ActionsPreferenceView.swift
 //  AppUI
 //
-//  Minimalist actions preference management interface
+//  Actions preference management interface - Updated with ProfileViewModel navigation
 //
 
 import SwiftUI
 
 struct ActionsPreferenceView: View {
+    @EnvironmentObject var profileViewModel: ProfileViewModel  // Added
     @State private var selectedActions: Set<Int> = [0, 2, 5] // Pre-selected actions for demo
     @State private var animateContent = false
     @State private var hasChanges = false
@@ -66,7 +61,7 @@ struct ActionsPreferenceView: View {
         VStack(spacing: 0) {
             HStack {
                 Button(action: {
-                    // Navigate back
+                    profileViewModel.showOnboardingPreferences() // Updated navigation
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .light))
@@ -242,4 +237,5 @@ struct ActionsPreferenceView: View {
 
 #Preview {
     ActionsPreferenceView()
+        .environmentObject(ProfileViewModel(onLogout: {}))
 }

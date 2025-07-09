@@ -1,19 +1,15 @@
 //
-//  UrgesPreferenceView.swift
-//  AppUI
-//
-//  Created by Ella A. Sadduq on 5/31/25.
-//
 //
 //  UrgesPreferenceView.swift
 //  AppUI
 //
-//  Minimalist urges preference management interface
+//  Urges preference management interface - Updated with ProfileViewModel navigation
 //
 
 import SwiftUI
 
 struct UrgesPreferenceView: View {
+    @EnvironmentObject var profileViewModel: ProfileViewModel  // Added
     @State private var selectedUrges: Set<Int> = [0, 3] // Pre-selected urges for demo
     @State private var animateContent = false
     @State private var hasChanges = false
@@ -64,7 +60,7 @@ struct UrgesPreferenceView: View {
         VStack(spacing: 0) {
             HStack {
                 Button(action: {
-                    // Navigate back
+                    profileViewModel.showOnboardingPreferences() // Updated navigation
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .light))
@@ -240,4 +236,5 @@ struct UrgesPreferenceView: View {
 
 #Preview {
     UrgesPreferenceView()
+        .environmentObject(ProfileViewModel(onLogout: {}))
 }
