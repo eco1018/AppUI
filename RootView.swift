@@ -1,5 +1,6 @@
 
 //
+//
 //  RootView.swift
 //  AppUI
 //
@@ -134,7 +135,9 @@ struct MainAppCoordinatorView: View {
                     Text("Card")
                 }
             
-            ProfileCoordinator()
+            ProfileCoordinator(onLogout: {
+                rootViewModel.logout()
+            })
                 .tabItem {
                     Image(systemName: "person.crop.circle")
                     Text("Profile")
