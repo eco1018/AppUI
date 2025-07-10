@@ -165,9 +165,6 @@
 //    }
 //}
 //
-//#Preview {
-//    SettingsView()
-//}
 //
 //  SettingsView.swift
 //  AppUI
@@ -220,7 +217,7 @@ struct SettingsView: View {
         VStack(spacing: 0) {
             HStack {
                 Button(action: {
-                    profileViewModel.showMenu()
+                    profileViewModel.goBack() // ✅ FIXED: Use generic back instead of showMenu()
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .light))
