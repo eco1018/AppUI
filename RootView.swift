@@ -4,7 +4,7 @@
 //  RootView.swift
 //  AppUI
 //
-//  Central navigation controller for the entire app
+//  Central navigation controller for the entire app with authentication persistence
 //
 
 import SwiftUI
@@ -23,38 +23,69 @@ class RootViewModel: ObservableObject {
     @Published var appState: AppState = .loading
     @Published var isLoading = true
     
+    // MARK: - UserDefaults Keys
+    private let onboardingCompleteKey = "onboarding_complete"
+    private let userAuthenticatedKey = "user_authenticated"
+    
     init() {
         determineInitialState()
     }
     
     private func determineInitialState() {
-        // Check if onboarding was completed
-        let onboardingComplete = UserDefaults.standard.bool(forKey: "onboarding_complete")
+        // Check both authentication and onboarding status
+        let isAuthenticated = UserDefaults.standard.bool(forKey: userAuthenticatedKey)
+        let onboardingComplete = UserDefaults.standard.bool(forKey: onboardingCompleteKey)
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            if onboardingComplete {
-                // Skip to main app if onboarding was completed
-                self.appState = .mainApp
-            } else {
-                // Start with authentication
+            if !isAuthenticated {
+                // User needs to authenticate first
                 self.appState = .authentication
+            } else if !onboardingComplete {
+                // User is authenticated but hasn't completed onboarding
+                self.appState = .onboarding
+            } else {
+                // User is authenticated and has completed onboarding
+                self.appState = .mainApp
             }
             self.isLoading = false
         }
     }
     
     func completeAuthentication() {
-        appState = .onboarding
+        // Save authentication status
+        UserDefaults.standard.set(true, forKey: userAuthenticatedKey)
+        
+        // Check if onboarding is needed
+        let onboardingComplete = UserDefaults.standard.bool(forKey: onboardingCompleteKey)
+        
+        if onboardingComplete {
+            // Skip onboarding if already completed
+            appState = .mainApp
+        } else {
+            // Go to onboarding
+            appState = .onboarding
+        }
     }
     
     func completeOnboarding() {
+        // Save onboarding completion status
+        UserDefaults.standard.set(true, forKey: onboardingCompleteKey)
         appState = .mainApp
     }
     
     func logout() {
-        // Clear onboarding completion flag on logout
-        UserDefaults.standard.set(false, forKey: "onboarding_complete")
+        // Clear both authentication and onboarding status
+        UserDefaults.standard.set(false, forKey: userAuthenticatedKey)
+        UserDefaults.standard.set(false, forKey: onboardingCompleteKey)
         appState = .authentication
+    }
+    
+    // MARK: - Helper Methods for Debugging
+    func getCurrentAuthStatus() -> (isAuthenticated: Bool, onboardingComplete: Bool) {
+        return (
+            UserDefaults.standard.bool(forKey: userAuthenticatedKey),
+            UserDefaults.standard.bool(forKey: onboardingCompleteKey)
+        )
     }
 }
 
@@ -144,48 +175,6 @@ struct MainAppCoordinatorView: View {
                 }
         }
         .tint(Color(red: 0.15, green: 0.15, blue: 0.2))
-    }
-}
-
-struct DiaryCardCoordinatorView: View {
-    var body: some View {
-        VStack(spacing: 30) {
-            Text("Daily Diary Card")
-                .font(.system(size: 42, weight: .ultraLight))
-                .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
-                .tracking(-1)
-            
-            Text("Multi-step diary entry")
-                .font(.system(size: 16, weight: .light))
-                .foregroundColor(Color(red: 0.4, green: 0.4, blue: 0.45))
-        }
-    }
-}
-
-struct ProfileCoordinatorView: View {
-    @EnvironmentObject var rootViewModel: RootViewModel
-    
-    var body: some View {
-        VStack(spacing: 30) {
-            Text("Profile")
-                .font(.system(size: 42, weight: .ultraLight))
-                .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
-                .tracking(-1)
-            
-            Text("Personal dashboard & settings")
-                .font(.system(size: 16, weight: .light))
-                .foregroundColor(Color(red: 0.4, green: 0.4, blue: 0.45))
-            
-            Button("Logout") {
-                rootViewModel.logout()
-            }
-            .font(.system(size: 18, weight: .light))
-            .foregroundColor(.white)
-            .padding(.vertical, 12)
-            .padding(.horizontal, 24)
-            .background(Color.red)
-            .cornerRadius(8)
-        }
     }
 }
 
