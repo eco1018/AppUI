@@ -1,6 +1,7 @@
 
 
 //
+//
 //  OnboardingSuccessView.swift
 //  AppUI
 //
@@ -74,52 +75,16 @@ struct OnboardingSuccessView: View {
         HStack {
             Spacer()
             if showContinueButton {
-                continueButton
+                SubmitButton(title: "begin", isLoading: onboardingViewModel.isLoading) {
+                    onboardingViewModel.completeOnboarding()
+                }
+                .scaleEffect(showContinueButton ? 1.0 : 0.8)
+                .opacity(showContinueButton ? 1.0 : 0.0)
+                .animation(.spring(response: 0.5, dampingFraction: 0.6), value: showContinueButton)
             }
         }
         .padding(.horizontal, 30)
         .padding(.bottom, 60)
-    }
-    
-    private var continueButton: some View {
-        Button(action: {
-            let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
-            impactFeedback.impactOccurred()
-            onboardingViewModel.completeOnboarding()
-        }) {
-            HStack(spacing: 10) {
-                if onboardingViewModel.isLoading {
-                    ProgressView()
-                        .scaleEffect(0.8)
-                        .tint(Color(red: 0.2, green: 0.2, blue: 0.25))
-                } else {
-                    Text("begin")
-                        .font(.system(size: 17, weight: .medium))
-                        .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
-                    
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
-                }
-            }
-            .padding(.horizontal, 24)
-            .padding(.vertical, 14)
-            .background(continueButtonBackground)
-        }
-        .disabled(onboardingViewModel.isLoading)
-        .scaleEffect(showContinueButton ? 1.0 : 0.8)
-        .opacity(showContinueButton ? 1.0 : 0.0)
-        .animation(.spring(response: 0.5, dampingFraction: 0.6), value: showContinueButton)
-    }
-    
-    private var continueButtonBackground: some View {
-        Capsule()
-            .fill(Color(red: 0.96, green: 0.96, blue: 0.97))
-            .overlay(
-                Capsule()
-                    .stroke(Color(red: 0.82, green: 0.82, blue: 0.85), lineWidth: 1.2)
-            )
-            .shadow(color: Color.black.opacity(0.12), radius: 12, x: 0, y: 4)
     }
     
     // MARK: - Helper Methods

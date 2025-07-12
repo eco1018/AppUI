@@ -2,6 +2,14 @@
 //  SubmitButton.swift
 //  AppUI
 //
+//  Created by Ella A. Sadduq on 7/12/25.
+//
+
+
+//
+//  SubmitButton.swift
+//  AppUI
+//
 //  Reusable submit button component for completion/action flows
 //  Features loading states, icons, and consistent capsule styling
 //
