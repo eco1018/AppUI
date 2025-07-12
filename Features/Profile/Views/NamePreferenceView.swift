@@ -256,16 +256,9 @@ struct NamePreferenceView: View {
     private var bottomSection: some View {
         VStack {
             if hasChanges && !firstName.trimmingCharacters(in: .whitespaces).isEmpty && !lastName.trimmingCharacters(in: .whitespaces).isEmpty {
-                Button(action: {
-                    let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
-                    impactFeedback.impactOccurred()
+                SaveButton(title: "save changes") {
                     hideKeyboard()
                     saveChanges()
-                }) {
-                    Text("save changes")
-                        .font(.system(size: 24, weight: .light))
-                        .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
-                        .tracking(-0.3)
                 }
                 .opacity(hasChanges ? 1.0 : 0.0)
                 .offset(y: hasChanges ? 0 : 30)

@@ -147,17 +147,9 @@ struct NotificationSettingsView: View {
     private var bottomSection: some View {
         VStack {
             if hasChanges {
-                Button(action: {
-                    let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
-                    impactFeedback.impactOccurred()
+                SaveButton {
                     saveChanges()
-                }) {
-                    Text("save")
-                        .font(.system(size: 24, weight: .light))
-                        .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
-                        .tracking(-0.3)
-                }
-                .opacity(hasChanges ? 1.0 : 0.0)
+                }                .opacity(hasChanges ? 1.0 : 0.0)
                 .offset(y: hasChanges ? 0 : 30)
                 .animation(.easeOut(duration: 0.8), value: hasChanges)
             }
