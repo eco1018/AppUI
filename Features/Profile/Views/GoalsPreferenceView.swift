@@ -2,16 +2,13 @@
 //  GoalsPreferenceView.swift
 //  AppUI
 //
-//
-//  GoalsPreferenceView.swift
-//  AppUI
-//
 //  Minimalist goals preference management interface
 //
 
 import SwiftUI
 
 struct GoalsPreferenceView: View {
+    @EnvironmentObject var profileViewModel: ProfileViewModel
     @State private var selectedGoals: Set<Int> = [0, 3] // Pre-selected goals for demo
     @State private var animateContent = false
     @State private var hasChanges = false
@@ -63,12 +60,8 @@ struct GoalsPreferenceView: View {
     private var headerSection: some View {
         VStack(spacing: 0) {
             HStack {
-                Button(action: {
-                    // Navigate back
-                }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 18, weight: .light))
-                        .foregroundColor(Color(red: 0.4, green: 0.4, blue: 0.45))
+                BackButton {
+                    profileViewModel.goBack()
                 }
                 
                 Spacer()
@@ -242,4 +235,5 @@ struct GoalsPreferenceView: View {
 
 #Preview {
     GoalsPreferenceView()
+        .environmentObject(ProfileViewModel(onLogout: {}))
 }
