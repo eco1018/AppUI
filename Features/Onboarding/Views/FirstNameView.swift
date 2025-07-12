@@ -38,12 +38,8 @@ struct FirstNameView: View {
         VStack(spacing: 0) {
             HStack {
                 // Back button (hidden on first step)
-                Button(action: {
+                BackButton {
                     onboardingViewModel.goToPrevious()
-                }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 18, weight: .light))
-                        .foregroundColor(Color(red: 0.4, green: 0.4, blue: 0.45))
                 }
                 .opacity(0) // Hidden on first step
                 
