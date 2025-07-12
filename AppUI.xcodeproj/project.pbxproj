@@ -78,11 +78,6 @@
 			path = Core;
 			sourceTree = "<group>";
 		};
-		C8733C9D2E1780490034AD1A /* Shared */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Shared;
-			sourceTree = "<group>";
-		};
 		C8733CA32E1780FF0034AD1A /* App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = App;
@@ -91,6 +86,11 @@
 		C8733CA42E1781210034AD1A /* Resources */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		C8733DD82E22BF550034AD1A /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Shared;
 			sourceTree = "<group>";
 		};
 		C8ABF8082DEAE236006963FD /* AppUI */ = {
@@ -165,9 +165,9 @@
 		C8ABF7FD2DEAE236006963FD = {
 			isa = PBXGroup;
 			children = (
+				C8733DD82E22BF550034AD1A /* Shared */,
 				C8733CA42E1781210034AD1A /* Resources */,
 				C8733CA32E1780FF0034AD1A /* App */,
-				C8733C9D2E1780490034AD1A /* Shared */,
 				C8733C9C2E1780210034AD1A /* Core */,
 				C8733C9B2E177FD00034AD1A /* Features */,
 				C8ABF8082DEAE236006963FD /* AppUI */,
@@ -208,9 +208,9 @@
 			fileSystemSynchronizedGroups = (
 				C8733C9B2E177FD00034AD1A /* Features */,
 				C8733C9C2E1780210034AD1A /* Core */,
-				C8733C9D2E1780490034AD1A /* Shared */,
 				C8733CA32E1780FF0034AD1A /* App */,
 				C8733CA42E1781210034AD1A /* Resources */,
+				C8733DD82E22BF550034AD1A /* Shared */,
 				C8ABF8082DEAE236006963FD /* AppUI */,
 			);
 			name = AppUI;

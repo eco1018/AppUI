@@ -3,7 +3,7 @@
 //  LastNameView.swift
 //  AppUI
 //
-//  Simple last name input with clean design
+//  Simple last name input with clean design - Updated with NextButton component
 //
 
 import SwiftUI
@@ -84,16 +84,9 @@ struct LastNameView: View {
     private var bottomSection: some View {
         VStack {
             if showContinueButton {
-                Button(action: {
-                    let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
-                    impactFeedback.impactOccurred()
+                NextButton(title: "continue") {
                     hideKeyboard()
                     onboardingViewModel.goToNext()
-                }) {
-                    Text("continue")
-                        .font(.system(size: 24, weight: .light))
-                        .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
-                        .tracking(-0.3)
                 }
                 .opacity(showContinueButton ? 1.0 : 0.0)
                 .offset(y: showContinueButton ? 0 : 30)
