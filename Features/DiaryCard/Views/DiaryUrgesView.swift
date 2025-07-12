@@ -1,6 +1,5 @@
 //
 //
-//
 //  DiaryUrgesView.swift
 //  AppUI
 //
@@ -130,17 +129,9 @@ struct DiaryUrgesView: View {
     private var bottomSection: some View {
         VStack {
             // Always show continue button for urges (can be none)
-            Button(action: {
-                let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
-                impactFeedback.impactOccurred()
+            NextButton(title: "next") {
                 diaryViewModel.goToNext()
-            }) {
-                Text("next")
-                    .font(.system(size: 24, weight: .light))
-                    .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
-                    .tracking(-0.3)
-            }
-            .opacity(animateContent ? 1.0 : 0.0)
+            }            .opacity(animateContent ? 1.0 : 0.0)
             .offset(y: animateContent ? 0 : 30)
             .animation(.easeOut(duration: 0.8).delay(1.0), value: animateContent)
         }

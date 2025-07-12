@@ -1,4 +1,5 @@
 //
+//
 //  DiaryNote.swift
 //  AppUI
 //
@@ -121,16 +122,9 @@ struct DiaryNote: View {
     private var bottomSection: some View {
         VStack {
             // Continue button (always available - note is optional)
-            Button(action: {
-                let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
-                impactFeedback.impactOccurred()
+            NextButton(title: "next") {
                 hideKeyboard()
                 diaryViewModel.goToNext()
-            }) {
-                Text("finish")
-                    .font(.system(size: 24, weight: .light))
-                    .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
-                    .tracking(-0.3)
             }
             .opacity(animateContent ? 1.0 : 0.0)
             .offset(y: animateContent ? 0 : 30)

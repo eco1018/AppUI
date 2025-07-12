@@ -121,15 +121,8 @@ struct DiaryEmotions: View {
     private var bottomSection: some View {
         VStack {
             if !diaryViewModel.selectedEmotions.isEmpty {
-                Button(action: {
-                    let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
-                    impactFeedback.impactOccurred()
+                NextButton(title: "next") {
                     diaryViewModel.goToNext()
-                }) {
-                    Text("next")
-                        .font(.system(size: 24, weight: .light))
-                        .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
-                        .tracking(-0.3)
                 }
                 .opacity(!diaryViewModel.selectedEmotions.isEmpty ? 1.0 : 0.0)
                 .offset(y: !diaryViewModel.selectedEmotions.isEmpty ? 0 : 30)
