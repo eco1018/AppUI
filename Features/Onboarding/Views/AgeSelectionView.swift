@@ -146,15 +146,8 @@ struct AgeSelectionView: View {
     private var bottomSection: some View {
         VStack {
             if showContinueButton {
-                Button(action: {
-                    let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
-                    impactFeedback.impactOccurred()
+                NextButton(title: "continue") {
                     onboardingViewModel.goToNext()
-                }) {
-                    Text("continue")
-                        .font(.system(size: 24, weight: .light))
-                        .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
-                        .tracking(-0.3)
                 }
                 .opacity(animateContent ? 1.0 : 0.0)
                 .scaleEffect(animateContent ? 1.0 : 0.8)

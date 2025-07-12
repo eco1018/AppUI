@@ -118,15 +118,8 @@ struct MedicationsView: View {
     private var bottomSection: some View {
         VStack {
             if showContinueButton {
-                Button(action: {
-                    let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
-                    impactFeedback.impactOccurred()
+                NextButton(title: "continue") {
                     onboardingViewModel.goToNext()
-                }) {
-                    Text("continue")
-                        .font(.system(size: 24, weight: .light))
-                        .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
-                        .tracking(-0.3)
                 }
                 .opacity(showContinueButton ? 1.0 : 0.0)
                 .offset(y: showContinueButton ? 0 : 30)
