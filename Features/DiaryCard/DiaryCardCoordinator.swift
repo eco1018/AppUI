@@ -260,20 +260,6 @@ struct DiaryCardCoordinator: View {
             .padding(.horizontal, 30)
             .padding(.top, 50)
             .padding(.bottom, 20)
-            
-            // Step indicator (hidden on completion step)
-            if diaryViewModel.currentStep != .completion {
-                HStack {
-                    Text("Step \(diaryViewModel.currentStep.rawValue + 1) of \(DiaryStep.allCases.count - 1)")
-                        .font(.system(size: 12, weight: .light))
-                        .foregroundColor(Color(red: 0.5, green: 0.5, blue: 0.55))
-                    
-                    Spacer()
-                }
-                .padding(.horizontal, 30)
-                .padding(.bottom, 10)
-                .opacity(0.7)
-            }
         }
     }
 }

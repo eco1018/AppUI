@@ -211,19 +211,11 @@ struct OnboardingCoordinator: View {
             .padding(.top, 50)
             .padding(.bottom, 20)
             
-            // Step indicator (hidden on success step)
-            if onboardingViewModel.currentStep != .success {
-                HStack {
-                    Text("Step \(onboardingViewModel.currentStep.rawValue + 1) of \(OnboardingStep.allCases.count - 1)")
-                        .font(.system(size: 12, weight: .light))
-                        .foregroundColor(Color(red: 0.5, green: 0.5, blue: 0.55))
-                    
-                    Spacer()
-                }
+           
                 .padding(.horizontal, 30)
                 .padding(.bottom, 10)
                 .opacity(0.7)
-            }
         }
     }
 }
+
