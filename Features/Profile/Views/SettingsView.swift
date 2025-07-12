@@ -165,7 +165,8 @@
 //    }
 //}
 //
-//
+
+
 //  SettingsView.swift
 //  AppUI
 //
@@ -216,12 +217,8 @@ struct SettingsView: View {
     private var headerSection: some View {
         VStack(spacing: 0) {
             HStack {
-                Button(action: {
-                    profileViewModel.goBack() // ✅ FIXED: Use generic back instead of showMenu()
-                }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 18, weight: .light))
-                        .foregroundColor(Color(red: 0.4, green: 0.4, blue: 0.45))
+                BackButton {
+                    profileViewModel.goBack()
                 }
                 
                 Spacer()

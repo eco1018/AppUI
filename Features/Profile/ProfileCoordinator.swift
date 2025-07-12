@@ -158,15 +158,8 @@ struct MainProfileView: View {
         VStack {
             Spacer()
             HStack {
-                Button(action: {
-                    let impactFeedback = UIImpactFeedbackGenerator(style: .light)
-                    impactFeedback.impactOccurred()
+                MenuButton {
                     onMenuTap()
-                }) {
-                    Image(systemName: "line.3.horizontal")
-                        .font(.system(size: 22, weight: .regular))
-                        .foregroundColor(Color(red: 0.4, green: 0.4, blue: 0.45))
-                        .frame(width: 44, height: 44)
                 }
                 .opacity(animateContent ? 0.8 : 0.0)
                 .animation(.easeOut(duration: 0.8).delay(1.0), value: animateContent)
