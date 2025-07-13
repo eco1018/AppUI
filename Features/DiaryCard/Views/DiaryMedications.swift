@@ -114,7 +114,8 @@ struct DiaryMedications: View {
             if showContinueButton {
                 NextButton(title: "next") {
                     diaryViewModel.goToNext()
-                }                .opacity(showContinueButton ? 1.0 : 0.0)
+                }
+                .opacity(showContinueButton ? 1.0 : 0.0)
                 .offset(y: showContinueButton ? 0 : 30)
                 .animation(.easeOut(duration: 0.8), value: showContinueButton)
             }
