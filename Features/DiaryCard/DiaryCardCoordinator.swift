@@ -48,6 +48,14 @@ class DiaryCardViewModel: ObservableObject {
     @Published var usedSkills: Set<String> = []
     @Published var noteText = ""
     
+    // Navigation - ADDED onComplete handler
+    var onComplete: (() -> Void)?
+    
+    // UPDATED: Added onComplete parameter
+    init(onComplete: @escaping () -> Void = {}) {
+        self.onComplete = onComplete
+    }
+    
     // MARK: - Navigation Methods
     func startDiaryCard() {
         // Reset diary data for new entry
@@ -84,6 +92,7 @@ class DiaryCardViewModel: ObservableObject {
         }
     }
     
+    // UPDATED: Now calls onComplete
     func completeDiaryCard() {
         isLoading = true
         
@@ -94,6 +103,8 @@ class DiaryCardViewModel: ObservableObject {
             withAnimation(.easeInOut(duration: 0.3)) {
                 self.showingDiaryFlow = false
             }
+            // ✅ NEW: Communicate completion back to parent
+            self.onComplete?()
         }
     }
     
@@ -118,7 +129,12 @@ class DiaryCardViewModel: ObservableObject {
 
 // MARK: - Diary Card Coordinator View
 struct DiaryCardCoordinator: View {
-    @StateObject private var diaryViewModel = DiaryCardViewModel()
+    @StateObject private var diaryViewModel: DiaryCardViewModel
+    
+    // UPDATED: Added onComplete parameter
+    init(onComplete: @escaping () -> Void = {}) {
+        self._diaryViewModel = StateObject(wrappedValue: DiaryCardViewModel(onComplete: onComplete))
+    }
     
     var body: some View {
         ZStack {
