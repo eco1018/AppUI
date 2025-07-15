@@ -3,7 +3,7 @@
 //  DiaryUrgesView.swift
 //  AppUI
 //
-//  Urges tracking for diary card with ViewModel integration
+//  Urges tracking for diary card with 0-10 rating scale
 //
 
 import SwiftUI
@@ -12,8 +12,8 @@ struct DiaryUrgesView: View {
     @EnvironmentObject var diaryViewModel: DiaryCardViewModel
     @State private var animateContent = false
     
-    // Available urges (matching your onboarding flow)
-    let availableUrges = [
+    // Available urges to be rated 0-10
+    let urges = [
         "substance use",
         "disordered eating",
         "shutting down",
@@ -25,9 +25,23 @@ struct DiaryUrgesView: View {
         "balance"
     ]
     
+    // Urge ratings (0-10) - you'll need to add this to DiaryCardViewModel
+    @State private var urgeRatings: [String: Double] = [
+        "substance use": 0,
+        "disordered eating": 0,
+        "shutting down": 0,
+        "breaking things": 0,
+        "alleviate": 0,
+        "anxiety": 0,
+        "awake": 0,
+        "sleep": 0,
+        "balance": 0
+    ]
+    
     var body: some View {
         VStack(spacing: 0) {
             headerSection
+            Spacer()
             urgesContent
             Spacer()
             bottomSection
@@ -68,7 +82,7 @@ struct DiaryUrgesView: View {
             
             // Subtitle
             HStack {
-                Text("Which urges did you experience today?")
+                Text("Rate your urges today (0-10)")
                     .font(.system(size: 16, weight: .light))
                     .foregroundColor(Color(red: 0.4, green: 0.4, blue: 0.45))
                     .opacity(animateContent ? 1.0 : 0.0)
@@ -84,11 +98,10 @@ struct DiaryUrgesView: View {
     
     // MARK: - Urges Content
     private var urgesContent: some View {
-        VStack(spacing: 30) {
-            // Urges grid
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 16), count: 2), spacing: 16) {
-                ForEach(Array(availableUrges.enumerated()), id: \.offset) { index, urge in
-                    urgeButton(urge: urge, index: index)
+        ScrollView(.vertical, showsIndicators: false) {
+            VStack(spacing: 40) {
+                ForEach(Array(urges.enumerated()), id: \.offset) { index, urge in
+                    urgeRatingView(urge: urge, index: index)
                 }
             }
             .padding(.horizontal, 30)
@@ -98,28 +111,50 @@ struct DiaryUrgesView: View {
         }
     }
     
-    private func urgeButton(urge: String, index: Int) -> some View {
-        let isSelected = diaryViewModel.selectedUrges.contains(urge)
-        
-        return Button(action: {
-            toggleUrge(urge)
-        }) {
-            Text(urge)
-                .font(.system(size: 18, weight: .light))
-                .foregroundColor(isSelected ? .white : Color(red: 0.15, green: 0.15, blue: 0.2))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(isSelected ? Color(red: 0.15, green: 0.15, blue: 0.2) : Color(red: 0.98, green: 0.98, blue: 0.99))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color(red: 0.9, green: 0.9, blue: 0.92), lineWidth: 1)
-                        )
-                )
+    private func urgeRatingView(urge: String, index: Int) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // Urge name and current rating
+            HStack {
+                Text(urge)
+                    .font(.system(size: 24, weight: .light))
+                    .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
+                
+                Spacer()
+                
+                Text("\(Int(urgeRatings[urge] ?? 0))")
+                    .font(.system(size: 24, weight: .medium))
+                    .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
+                    .frame(width: 40, alignment: .trailing)
+            }
+            
+            // Visual progress indicator
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    // Background track
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(Color(red: 0.9, green: 0.9, blue: 0.92))
+                        .frame(height: 6)
+                    
+                    // Progress fill
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(Color(red: 0.15, green: 0.15, blue: 0.2))
+                        .frame(width: geometry.size.width * CGFloat(urgeRatings[urge] ?? 0) / 10.0, height: 6)
+                        .animation(.easeInOut(duration: 0.2), value: urgeRatings[urge])
+                }
+            }
+            .frame(height: 6)
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { value in
+                        let newValue = min(max(0, value.location.x / UIScreen.main.bounds.width * 10), 10)
+                        urgeRatings[urge] = round(newValue)
+                        
+                        let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                        impactFeedback.impactOccurred()
+                    }
+            )
         }
-        .scaleEffect(isSelected ? 1.02 : 1.0)
-        .animation(.easeInOut(duration: 0.2), value: isSelected)
         .opacity(animateContent ? 1.0 : 0.0)
         .offset(y: animateContent ? 0 : 20)
         .animation(.easeOut(duration: 0.6).delay(Double(index) * 0.1 + 0.8), value: animateContent)
@@ -128,29 +163,32 @@ struct DiaryUrgesView: View {
     // MARK: - Bottom Section
     private var bottomSection: some View {
         VStack {
-            // Always show continue button for urges (can be none)
             NextButton(title: "next") {
+                // Save ratings to view model
+                saveUrgeRatings()
                 diaryViewModel.goToNext()
-            }            .opacity(animateContent ? 1.0 : 0.0)
+            }
+            .opacity(animateContent ? 1.0 : 0.0)
             .offset(y: animateContent ? 0 : 30)
-            .animation(.easeOut(duration: 0.8).delay(1.0), value: animateContent)
+            .animation(.easeOut(duration: 0.8).delay(1.4), value: animateContent)
         }
         .padding(.horizontal, 30)
         .padding(.bottom, 60)
     }
     
     // MARK: - Helper Methods
-    private func toggleUrge(_ urge: String) {
-        let impactFeedback = UIImpactFeedbackGenerator(style: .light)
-        impactFeedback.impactOccurred()
-        
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-            if diaryViewModel.selectedUrges.contains(urge) {
-                diaryViewModel.selectedUrges.remove(urge)
-            } else {
-                diaryViewModel.selectedUrges.insert(urge)
+    private func saveUrgeRatings() {
+        // Convert ratings to your preferred format for the view model
+        // For now, saving urges with ratings > 0 to the existing selectedUrges set
+        diaryViewModel.selectedUrges.removeAll()
+        for (urge, rating) in urgeRatings {
+            if rating > 0 {
+                diaryViewModel.selectedUrges.insert("\(urge):\(Int(rating))")
             }
         }
+        
+        // TODO: Consider updating DiaryCardViewModel to use [String: Int] for urge ratings
+        // instead of Set<String> for better data structure
     }
     
     private func performAppearAnimations() {

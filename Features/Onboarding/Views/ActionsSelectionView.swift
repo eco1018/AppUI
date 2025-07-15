@@ -1,8 +1,9 @@
 //
+//
 //  ActionsSelectionView.swift
 //  AppUI
 //
-//  Actions selection with coordinator integration
+//  Actions selection with coordinator integration - Simplified
 //
 
 import SwiftUI
@@ -11,7 +12,6 @@ struct ActionsSelectionView: View {
     @EnvironmentObject var onboardingViewModel: OnboardingViewModel
     @State private var animateContent = false
     @State private var showContinueButton = false
-    @State private var activeItemIndex: Int = 0
     
     let actions = [
         ActionItem(title: "substance use", description: "using alcohol or drugs to cope with pain or numb emotions", timing: ""),
@@ -58,7 +58,6 @@ struct ActionsSelectionView: View {
     private var headerSection: some View {
         VStack(spacing: 0) {
             HStack {
-                // Replace hardcoded button with:
                 BackButton {
                     onboardingViewModel.goToPrevious()
                 }
@@ -118,149 +117,67 @@ struct ActionsSelectionView: View {
         }
     }
     
-    // MARK: - Scrollable Content
+    // MARK: - Simplified Scrollable Content
     private var scrollableContent: some View {
-        ScrollViewReader { proxy in
-            ScrollView(.vertical, showsIndicators: false) {
-                LazyVStack(alignment: .leading, spacing: 0) {
-                    Spacer(minLength: 80)
-                    
-                    ForEach(Array(actions.enumerated()), id: \.offset) { index, action in
-                        actionItemView(action: action, index: index)
-                            .id(index)
-                    }
-                    
-                    Spacer(minLength: 120)
+        ScrollView(.vertical, showsIndicators: false) {
+            LazyVStack(spacing: 16) {
+                ForEach(Array(actions.enumerated()), id: \.offset) { index, action in
+                    actionItemView(action: action, index: index)
                 }
             }
-            .coordinateSpace(name: "scroll")
-            .onPreferenceChange(ActionsScrollOffsetPreferenceKey.self) { preferences in
-                updateActiveItem(from: preferences)
-            }
+            .padding(.horizontal, 30)
+            .padding(.vertical, 40)
         }
     }
     
     private func actionItemView(action: ActionItem, index: Int) -> some View {
-        let isActive = index == activeItemIndex
         let isSelected = onboardingViewModel.selectedActions.contains(index)
-        let isSelectable = true
         
         return Button(action: {
             handleActionSelection(index: index)
         }) {
-            HStack(alignment: .top, spacing: 20) {
-                actionContentView(action: action, index: index, isActive: isActive)
-                Spacer(minLength: 12)
-                if isSelectable && isSelected {
-                    selectionIndicatorView(index: index, isSelected: isSelected)
+            HStack(alignment: .top, spacing: 16) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(action.title)
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(isSelected ? .white : Color(red: 0.15, green: 0.15, blue: 0.2))
+                        .multilineTextAlignment(.leading)
+                    
+                    Text(action.description)
+                        .font(.system(size: 14, weight: .light))
+                        .foregroundColor(isSelected ? Color.white.opacity(0.8) : Color(red: 0.5, green: 0.5, blue: 0.55))
+                        .multilineTextAlignment(.leading)
+                        .lineLimit(2)
+                }
+                
+                Spacer()
+                
+                if isSelected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(.white)
+                } else {
+                    Circle()
+                        .stroke(Color(red: 0.8, green: 0.8, blue: 0.85), lineWidth: 1)
+                        .frame(width: 20, height: 20)
                 }
             }
-            .padding(.horizontal, 30)
-            .padding(.vertical, isActive ? 12 : 8)
-            .background(actionBackgroundView(isActive: isActive))
-            .scaleEffect(getItemScale(index: index))
+            .padding(20)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(isSelected ? Color(red: 0.15, green: 0.15, blue: 0.2) : Color(red: 0.98, green: 0.98, blue: 0.99))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color(red: 0.9, green: 0.9, blue: 0.92), lineWidth: isSelected ? 0 : 1)
+                    )
+            )
         }
         .buttonStyle(PlainButtonStyle())
-        .disabled(!isSelectable)
-        .background(geometryReaderView(index: index))
-        .opacity(animateContent ? 1.0 : 0.0)
-        .offset(y: animateContent ? 0 : 40)
-        .animation(.easeOut(duration: 0.7).delay(Double(index) * 0.08), value: animateContent)
-        .animation(.interpolatingSpring(stiffness: 180, damping: 18), value: activeItemIndex)
-    }
-    
-    private func actionContentView(action: ActionItem, index: Int, isActive: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            titleView(action: action, index: index, isActive: isActive)
-            
-            if isActive {
-                descriptionView(action: action)
-            }
-        }
-    }
-    
-    private func titleView(action: ActionItem, index: Int, isActive: Bool) -> some View {
-        let isSelected = onboardingViewModel.selectedActions.contains(index)
-        
-        // Size logic: selected items get bigger, active items get biggest
-        let fontSize: CGFloat = {
-            if isActive {
-                return isSelected ? 44 : 42
-            } else if isSelected {
-                return 30
-            } else {
-                return 26
-            }
-        }()
-        
-        let fontWeight: Font.Weight = isActive ? .thin : .ultraLight
-        let tracking: CGFloat = isActive ? -1.0 : -0.2
-        let textColor = getTextColor(for: index)
-        let textOpacity = getTextOpacity(for: index)
-        
-        return Text(action.title)
-            .font(.system(size: fontSize, weight: fontWeight))
-            .foregroundColor(textColor)
-            .opacity(textOpacity)
-            .multilineTextAlignment(.leading)
-            .tracking(tracking)
-            .lineLimit(nil)
-            .fixedSize(horizontal: false, vertical: true)
-            .animation(.interpolatingSpring(stiffness: 200, damping: 20), value: activeItemIndex)
-            .animation(.interpolatingSpring(stiffness: 200, damping: 20), value: onboardingViewModel.selectedActions)
-    }
-    
-    private func descriptionView(action: ActionItem) -> some View {
-        Text(action.description)
-            .font(.system(size: 15, weight: .light))
-            .foregroundColor(Color(red: 0.25, green: 0.25, blue: 0.3))
-            .opacity(0.9)
-            .multilineTextAlignment(.leading)
-            .lineSpacing(4)
-            .fixedSize(horizontal: false, vertical: true)
-            .transition(.asymmetric(
-                insertion: .scale(scale: 0.95).combined(with: .opacity).animation(.easeOut(duration: 0.3)),
-                removal: .scale(scale: 1.05).combined(with: .opacity).animation(.easeIn(duration: 0.2))
-            ))
-    }
-    
-    private func selectionIndicatorView(index: Int, isSelected: Bool) -> some View {
-        ZStack {
-            // Subtle background circle
-            Circle()
-                .fill(Color(red: 0.98, green: 0.98, blue: 0.99))
-                .frame(width: 28, height: 28)
-                .overlay(
-                    Circle()
-                        .stroke(Color(red: 0.15, green: 0.15, blue: 0.2), lineWidth: 1.5)
-                )
-                .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 1)
-            
-            // Minimalist checkmark
-            if isSelected {
-                Image(systemName: "checkmark")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
-            }
-        }
-        .scaleEffect(isSelected ? 1.0 : 0.9)
-        .opacity(isSelected ? 1.0 : 0.8)
+        .scaleEffect(isSelected ? 1.02 : 1.0)
         .animation(.easeInOut(duration: 0.2), value: isSelected)
-    }
-    
-    private func actionBackgroundView(isActive: Bool) -> some View {
-        RoundedRectangle(cornerRadius: 0)
-            .fill(Color.clear)
-    }
-    
-    private func geometryReaderView(index: Int) -> some View {
-        GeometryReader { geometry in
-            Color.clear
-                .preference(
-                    key: ActionsScrollOffsetPreferenceKey.self,
-                    value: [ActionsScrollOffsetData(index: index, offset: geometry.frame(in: .named("scroll")).midY)]
-                )
-        }
+        .opacity(animateContent ? 1.0 : 0.0)
+        .offset(y: animateContent ? 0 : 20)
+        .animation(.easeOut(duration: 0.6).delay(Double(index) * 0.05), value: animateContent)
     }
     
     // MARK: - Bottom Section
@@ -268,8 +185,11 @@ struct ActionsSelectionView: View {
         VStack {
             if showContinueButton {
                 NextButton(title: "continue") {
-                    onboardingViewModel.goToNext()  // ✅ Just the navigation
+                    onboardingViewModel.goToNext()
                 }
+                .opacity(showContinueButton ? 1.0 : 0.0)
+                .offset(y: showContinueButton ? 0 : 30)
+                .animation(.easeOut(duration: 0.8), value: showContinueButton)
             }
         }
         .padding(.horizontal, 30)
@@ -281,8 +201,7 @@ struct ActionsSelectionView: View {
         let impactFeedback = UIImpactFeedbackGenerator(style: .light)
         impactFeedback.impactOccurred()
         
-        // Allow selection of any item, limit to 3
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
             if onboardingViewModel.selectedActions.contains(index) {
                 onboardingViewModel.selectedActions.remove(index)
             } else if onboardingViewModel.selectedActions.count < 3 {
@@ -297,58 +216,6 @@ struct ActionsSelectionView: View {
         }
     }
     
-    private func getTextColor(for index: Int) -> Color {
-        let isSelected = onboardingViewModel.selectedActions.contains(index)
-        
-        if index == activeItemIndex {
-            return isSelected ?
-            Color(red: 0.05, green: 0.05, blue: 0.1) :  // Even darker when both active and selected
-            Color(red: 0.15, green: 0.15, blue: 0.2)
-        } else if isSelected {
-            return Color(red: 0.15, green: 0.15, blue: 0.2)  // Darker for selected items
-        } else {
-            return Color(red: 0.45, green: 0.45, blue: 0.5)
-        }
-    }
-    
-    private func getTextOpacity(for index: Int) -> Double {
-        if index == activeItemIndex {
-            return 1.0
-        } else if onboardingViewModel.selectedActions.contains(index) {
-            return 0.9
-        } else {
-            let distance = abs(index - activeItemIndex)
-            return distance == 1 ? 0.7 : 0.5
-        }
-    }
-    
-    private func getItemScale(index: Int) -> CGFloat {
-        if index == activeItemIndex {
-            return 1.02
-        } else if abs(index - activeItemIndex) == 1 {
-            return 0.98
-        } else {
-            return 0.95
-        }
-    }
-    
-    private func updateActiveItem(from preferences: [ActionsScrollOffsetData]) {
-        // Target the center of the visible area where we want the active item
-        let targetY: CGFloat = 380
-        
-        // Find the item closest to the target center position
-        let closest = preferences.min { abs($0.offset - targetY) < abs($1.offset - targetY) }
-        
-        if let newActiveIndex = closest?.index, newActiveIndex != activeItemIndex {
-            withAnimation(.interpolatingSpring(stiffness: 200, damping: 20)) {
-                activeItemIndex = newActiveIndex
-            }
-            
-            let selectionFeedback = UISelectionFeedbackGenerator()
-            selectionFeedback.selectionChanged()
-        }
-    }
-    
     private func performAppearAnimations() {
         withAnimation(.easeOut(duration: 0.6)) {
             animateContent = true
@@ -356,28 +223,11 @@ struct ActionsSelectionView: View {
     }
 }
 
-// MARK: - Supporting Types (keep existing ones)
+// MARK: - Supporting Types
 struct ActionItem {
     let title: String
     let description: String
     let timing: String
-}
-
-struct ActionsScrollOffsetData: Equatable {
-    let index: Int
-    let offset: CGFloat
-    
-    static func == (lhs: ActionsScrollOffsetData, rhs: ActionsScrollOffsetData) -> Bool {
-        return lhs.index == rhs.index && abs(lhs.offset - rhs.offset) < 0.1
-    }
-}
-
-struct ActionsScrollOffsetPreferenceKey: PreferenceKey {
-    static var defaultValue: [ActionsScrollOffsetData] = []
-    
-    static func reduce(value: inout [ActionsScrollOffsetData], nextValue: () -> [ActionsScrollOffsetData]) {
-        value.append(contentsOf: nextValue())
-    }
 }
 
 #Preview {

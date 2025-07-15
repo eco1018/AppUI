@@ -1,8 +1,9 @@
 //
+//
 //  DiaryMedications.swift
 //  AppUI
 //
-//  Medications tracking for diary card
+//  Medications tracking for diary card with card UI
 //
 
 import SwiftUI
@@ -16,13 +17,12 @@ struct DiaryMedications: View {
         VStack(spacing: 0) {
             headerSection
             Spacer()
-            medicationsContent
+            medicationSelectionContent
             Spacer()
             bottomSection
         }
         .onAppear {
             performAppearAnimations()
-            updateContinueButton()
         }
         .onChange(of: diaryViewModel.tookMedications) { _ in
             updateContinueButton()
@@ -43,69 +43,116 @@ struct DiaryMedications: View {
             .padding(.top, 20)
             .padding(.bottom, 40)
             
-            // Title
-            HStack {
-                Text("Medications")
-                    .font(.system(size: 42, weight: .ultraLight))
-                    .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
-                    .tracking(-1)
-                    .opacity(animateContent ? 1.0 : 0.0)
-                    .offset(y: animateContent ? 0 : 30)
-                    .animation(.easeOut(duration: 0.8).delay(0.2), value: animateContent)
+            // Title and subtitle
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Text("Medications")
+                        .font(.system(size: 42, weight: .ultraLight))
+                        .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
+                        .tracking(-1)
+                        .opacity(animateContent ? 1.0 : 0.0)
+                        .offset(y: animateContent ? 0 : 30)
+                        .animation(.easeOut(duration: 0.8).delay(0.2), value: animateContent)
+                    
+                    Spacer()
+                }
                 
-                Spacer()
-            }
-            .padding(.horizontal, 30)
-            .padding(.bottom, 20)
-            
-            // Subtitle
-            HStack {
-                Text("Did you take your medications today?")
-                    .font(.system(size: 16, weight: .light))
-                    .foregroundColor(Color(red: 0.4, green: 0.4, blue: 0.45))
-                    .opacity(animateContent ? 1.0 : 0.0)
-                    .offset(y: animateContent ? 0 : 20)
-                    .animation(.easeOut(duration: 0.8).delay(0.4), value: animateContent)
-                
-                Spacer()
+                HStack {
+                    Text("did you take your medications today?")
+                        .font(.system(size: 16, weight: .light))
+                        .foregroundColor(Color(red: 0.4, green: 0.4, blue: 0.45))
+                        .opacity(animateContent ? 1.0 : 0.0)
+                        .offset(y: animateContent ? 0 : 20)
+                        .animation(.easeOut(duration: 0.8).delay(0.4), value: animateContent)
+                    
+                    Spacer()
+                }
             }
             .padding(.horizontal, 30)
             .padding(.bottom, 40)
         }
     }
     
-    // MARK: - Medications Content
-    private var medicationsContent: some View {
-        VStack(spacing: 40) {
+    // MARK: - Medication Selection Content (Centered)
+    private var medicationSelectionContent: some View {
+        VStack(spacing: 16) {
             // Yes option
             Button(action: {
                 selectOption(true)
             }) {
-                Text("yes")
-                    .font(.system(size: 24, weight: .light))
-                    .foregroundColor(diaryViewModel.tookMedications ? Color(red: 0.15, green: 0.15, blue: 0.2) : Color(red: 0.5, green: 0.5, blue: 0.55))
-                    .scaleEffect(diaryViewModel.tookMedications ? 1.05 : 1.0)
-                    .animation(.easeInOut(duration: 0.2), value: diaryViewModel.tookMedications)
+                HStack {
+                    Text("yes")
+                        .font(.system(size: 24, weight: .light))
+                        .foregroundColor(diaryViewModel.tookMedications ? .white : Color(red: 0.15, green: 0.15, blue: 0.2))
+                    
+                    Spacer()
+                    
+                    if diaryViewModel.tookMedications {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(.white)
+                    } else {
+                        Circle()
+                            .stroke(Color(red: 0.8, green: 0.8, blue: 0.85), lineWidth: 1)
+                            .frame(width: 20, height: 20)
+                    }
+                }
+                .padding(20)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(diaryViewModel.tookMedications ? Color(red: 0.15, green: 0.15, blue: 0.2) : Color(red: 0.98, green: 0.98, blue: 0.99))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color(red: 0.9, green: 0.9, blue: 0.92), lineWidth: diaryViewModel.tookMedications ? 0 : 1)
+                        )
+                )
             }
+            .buttonStyle(PlainButtonStyle())
+            .scaleEffect(diaryViewModel.tookMedications ? 1.02 : 1.0)
+            .animation(.easeInOut(duration: 0.2), value: diaryViewModel.tookMedications)
             .opacity(animateContent ? 1.0 : 0.0)
             .offset(y: animateContent ? 0 : 20)
-            .animation(.easeOut(duration: 0.8).delay(0.6), value: animateContent)
+            .animation(.easeOut(duration: 0.6).delay(0.6), value: animateContent)
             
             // No option
             Button(action: {
                 selectOption(false)
             }) {
-                Text("no")
-                    .font(.system(size: 24, weight: .light))
-                    .foregroundColor(!diaryViewModel.tookMedications ? Color(red: 0.15, green: 0.15, blue: 0.2) : Color(red: 0.5, green: 0.5, blue: 0.55))
-                    .scaleEffect(!diaryViewModel.tookMedications ? 1.05 : 1.0)
-                    .animation(.easeInOut(duration: 0.2), value: diaryViewModel.tookMedications)
+                HStack {
+                    Text("no")
+                        .font(.system(size: 24, weight: .light))
+                        .foregroundColor(!diaryViewModel.tookMedications ? .white : Color(red: 0.15, green: 0.15, blue: 0.2))
+                    
+                    Spacer()
+                    
+                    if !diaryViewModel.tookMedications {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(.white)
+                    } else {
+                        Circle()
+                            .stroke(Color(red: 0.8, green: 0.8, blue: 0.85), lineWidth: 1)
+                            .frame(width: 20, height: 20)
+                    }
+                }
+                .padding(20)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(!diaryViewModel.tookMedications ? Color(red: 0.15, green: 0.15, blue: 0.2) : Color(red: 0.98, green: 0.98, blue: 0.99))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color(red: 0.9, green: 0.9, blue: 0.92), lineWidth: !diaryViewModel.tookMedications ? 0 : 1)
+                        )
+                )
             }
+            .buttonStyle(PlainButtonStyle())
+            .scaleEffect(!diaryViewModel.tookMedications ? 1.02 : 1.0)
+            .animation(.easeInOut(duration: 0.2), value: diaryViewModel.tookMedications)
             .opacity(animateContent ? 1.0 : 0.0)
             .offset(y: animateContent ? 0 : 20)
-            .animation(.easeOut(duration: 0.8).delay(0.8), value: animateContent)
+            .animation(.easeOut(duration: 0.6).delay(0.7), value: animateContent)
         }
-        .padding(.horizontal, 40)
+        .padding(.horizontal, 30)
     }
     
     // MARK: - Bottom Section
@@ -129,15 +176,14 @@ struct DiaryMedications: View {
         let impactFeedback = UIImpactFeedbackGenerator(style: .light)
         impactFeedback.impactOccurred()
         
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
             diaryViewModel.tookMedications = tookMeds
         }
     }
     
     private func updateContinueButton() {
-        // For simplicity, always show continue button since it's a yes/no choice
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-            showContinueButton = true
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
+            showContinueButton = true // Always show since it's a boolean choice
         }
     }
     
@@ -152,3 +198,4 @@ struct DiaryMedications: View {
     DiaryMedications()
         .environmentObject(DiaryCardViewModel())
 }
+

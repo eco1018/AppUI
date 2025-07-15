@@ -68,6 +68,11 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		C864D6062E25D7B700681CB7 /* ViewIdeas */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ViewIdeas;
+			sourceTree = "<group>";
+		};
 		C8733C9B2E177FD00034AD1A /* Features */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Features;
@@ -165,6 +170,7 @@
 		C8ABF7FD2DEAE236006963FD = {
 			isa = PBXGroup;
 			children = (
+				C864D6062E25D7B700681CB7 /* ViewIdeas */,
 				C8733DD82E22BF550034AD1A /* Shared */,
 				C8733CA42E1781210034AD1A /* Resources */,
 				C8733CA32E1780FF0034AD1A /* App */,
@@ -206,6 +212,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				C864D6062E25D7B700681CB7 /* ViewIdeas */,
 				C8733C9B2E177FD00034AD1A /* Features */,
 				C8733C9C2E1780210034AD1A /* Core */,
 				C8733CA32E1780FF0034AD1A /* App */,
