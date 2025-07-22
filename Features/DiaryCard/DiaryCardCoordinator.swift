@@ -168,8 +168,10 @@ struct DiaryCardCoordinator: View {
             .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Progress Bar Section
-                progressBarSection
+                // Progress Bar Section - Only show if not on completion step
+                if diaryViewModel.currentStep != .completion {
+                    progressBarSection
+                }
                 
                 // Content based on current step
                 switch diaryViewModel.currentStep {

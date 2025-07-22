@@ -43,8 +43,11 @@ struct DiaryEmotions: View {
     private var headerSection: some View {
         VStack(spacing: 0) {
             HStack {
-                BackButton {
-                    diaryViewModel.goToPrevious()
+                // Only show back button if we're not on the first step
+                if diaryViewModel.currentStep.rawValue > 0 {
+                    BackButton {
+                        diaryViewModel.goToPrevious()
+                    }
                 }
                 
                 Spacer()
