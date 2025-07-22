@@ -1,5 +1,4 @@
 //
-//
 //  DiaryMedications.swift
 //  AppUI
 //
@@ -11,7 +10,6 @@ import SwiftUI
 struct DiaryMedications: View {
     @EnvironmentObject var diaryViewModel: DiaryCardViewModel
     @State private var animateContent = false
-    @State private var showContinueButton = false
     
     var body: some View {
         VStack(spacing: 0) {
@@ -23,9 +21,6 @@ struct DiaryMedications: View {
         }
         .onAppear {
             performAppearAnimations()
-        }
-        .onChange(of: diaryViewModel.tookMedications) { _ in
-            updateContinueButton()
         }
     }
     
@@ -83,11 +78,11 @@ struct DiaryMedications: View {
                 HStack {
                     Text("yes")
                         .font(.system(size: 24, weight: .light))
-                        .foregroundColor(diaryViewModel.tookMedications ? .white : Color(red: 0.15, green: 0.15, blue: 0.2))
+                        .foregroundColor((diaryViewModel.tookMedications == true) ? .white : Color(red: 0.15, green: 0.15, blue: 0.2))
                     
                     Spacer()
                     
-                    if diaryViewModel.tookMedications {
+                    if diaryViewModel.tookMedications == true {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 20))
                             .foregroundColor(.white)
@@ -100,15 +95,15 @@ struct DiaryMedications: View {
                 .padding(20)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(diaryViewModel.tookMedications ? Color(red: 0.15, green: 0.15, blue: 0.2) : Color(red: 0.98, green: 0.98, blue: 0.99))
+                        .fill((diaryViewModel.tookMedications == true) ? Color(red: 0.15, green: 0.15, blue: 0.2) : Color(red: 0.98, green: 0.98, blue: 0.99))
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color(red: 0.9, green: 0.9, blue: 0.92), lineWidth: diaryViewModel.tookMedications ? 0 : 1)
+                                .stroke(Color(red: 0.9, green: 0.9, blue: 0.92), lineWidth: (diaryViewModel.tookMedications == true) ? 0 : 1)
                         )
                 )
             }
             .buttonStyle(PlainButtonStyle())
-            .scaleEffect(diaryViewModel.tookMedications ? 1.02 : 1.0)
+            .scaleEffect((diaryViewModel.tookMedications == true) ? 1.02 : 1.0)
             .animation(.easeInOut(duration: 0.2), value: diaryViewModel.tookMedications)
             .opacity(animateContent ? 1.0 : 0.0)
             .offset(y: animateContent ? 0 : 20)
@@ -121,11 +116,11 @@ struct DiaryMedications: View {
                 HStack {
                     Text("no")
                         .font(.system(size: 24, weight: .light))
-                        .foregroundColor(!diaryViewModel.tookMedications ? .white : Color(red: 0.15, green: 0.15, blue: 0.2))
+                        .foregroundColor((diaryViewModel.tookMedications == false) ? .white : Color(red: 0.15, green: 0.15, blue: 0.2))
                     
                     Spacer()
                     
-                    if !diaryViewModel.tookMedications {
+                    if diaryViewModel.tookMedications == false {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 20))
                             .foregroundColor(.white)
@@ -138,15 +133,15 @@ struct DiaryMedications: View {
                 .padding(20)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(!diaryViewModel.tookMedications ? Color(red: 0.15, green: 0.15, blue: 0.2) : Color(red: 0.98, green: 0.98, blue: 0.99))
+                        .fill((diaryViewModel.tookMedications == false) ? Color(red: 0.15, green: 0.15, blue: 0.2) : Color(red: 0.98, green: 0.98, blue: 0.99))
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color(red: 0.9, green: 0.9, blue: 0.92), lineWidth: !diaryViewModel.tookMedications ? 0 : 1)
+                                .stroke(Color(red: 0.9, green: 0.9, blue: 0.92), lineWidth: (diaryViewModel.tookMedications == false) ? 0 : 1)
                         )
                 )
             }
             .buttonStyle(PlainButtonStyle())
-            .scaleEffect(!diaryViewModel.tookMedications ? 1.02 : 1.0)
+            .scaleEffect((diaryViewModel.tookMedications == false) ? 1.02 : 1.0)
             .animation(.easeInOut(duration: 0.2), value: diaryViewModel.tookMedications)
             .opacity(animateContent ? 1.0 : 0.0)
             .offset(y: animateContent ? 0 : 20)
@@ -158,14 +153,12 @@ struct DiaryMedications: View {
     // MARK: - Bottom Section
     private var bottomSection: some View {
         VStack {
-            if showContinueButton {
-                NextButton(title: "next") {
-                    diaryViewModel.goToNext()
-                }
-                .opacity(showContinueButton ? 1.0 : 0.0)
-                .offset(y: showContinueButton ? 0 : 30)
-                .animation(.easeOut(duration: 0.8), value: showContinueButton)
+            NextButton(title: "next") {
+                diaryViewModel.goToNext()
             }
+            .opacity(animateContent ? 1.0 : 0.0)
+            .offset(y: animateContent ? 0 : 30)
+            .animation(.easeOut(duration: 0.8).delay(1.0), value: animateContent)
         }
         .padding(.horizontal, 30)
         .padding(.bottom, 60)
@@ -181,12 +174,6 @@ struct DiaryMedications: View {
         }
     }
     
-    private func updateContinueButton() {
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
-            showContinueButton = true // Always show since it's a boolean choice
-        }
-    }
-    
     private func performAppearAnimations() {
         withAnimation(.easeOut(duration: 0.6)) {
             animateContent = true
@@ -198,4 +185,3 @@ struct DiaryMedications: View {
     DiaryMedications()
         .environmentObject(DiaryCardViewModel())
 }
-

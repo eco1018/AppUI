@@ -122,7 +122,7 @@ struct DiaryNote: View {
     private var bottomSection: some View {
         VStack {
             // Continue button (always available - note is optional)
-            NextButton(title: "next") {
+            NextButton(title: "complete") {
                 hideKeyboard()
                 diaryViewModel.goToNext()
             }

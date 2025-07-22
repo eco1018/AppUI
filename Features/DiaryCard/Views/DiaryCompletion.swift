@@ -81,20 +81,20 @@ struct DiaryCompletion: View {
     // MARK: - Bottom Section
     private var bottomSection: some View {
         HStack {
-            Spacer()
+            Spacer()  // Left spacer
             if showContinueButton {
-                SubmitButton(title: "finish", isLoading: diaryViewModel.isLoading) {
+                SubmitButton(title: "exit", isLoading: diaryViewModel.isLoading) {
                     diaryViewModel.completeDiaryCard()
                 }
                 .scaleEffect(showContinueButton ? 1.0 : 0.8)
                 .opacity(showContinueButton ? 1.0 : 0.0)
                 .animation(.spring(response: 0.5, dampingFraction: 0.6), value: showContinueButton)
             }
+            Spacer()  // Right spacer (ADD THIS)
         }
         .padding(.horizontal, 30)
         .padding(.bottom, 60)
     }
-    
     // MARK: - Helper Methods
     private func performAppearAnimations() {
         withAnimation(.easeOut(duration: 0.6)) {

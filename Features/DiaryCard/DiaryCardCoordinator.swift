@@ -1,5 +1,4 @@
 //
-//
 //  DiaryCardCoordinator.swift
 //  AppUI
 //
@@ -45,7 +44,7 @@ class DiaryCardViewModel: ObservableObject {
     @Published var selectedUrges: Set<String> = []
     @Published var completedGoals: Set<String> = []
     @Published var performedActions: Set<String> = []
-    @Published var tookMedications = false
+    @Published var tookMedications: Bool? = nil  // CHANGED: from Bool to Bool?
     @Published var usedSkills: Set<String> = []
     @Published var noteText = ""
     
@@ -115,7 +114,7 @@ class DiaryCardViewModel: ObservableObject {
         selectedUrges.removeAll()
         completedGoals.removeAll()
         performedActions.removeAll()
-        tookMedications = false
+        tookMedications = nil  // CHANGED: from false to nil
         usedSkills.removeAll()
         noteText = ""
     }
