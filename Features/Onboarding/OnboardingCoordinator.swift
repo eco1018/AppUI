@@ -148,8 +148,10 @@ struct OnboardingCoordinator: View {
             .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Progress Bar Section
-                progressBarSection
+                // Progress Bar Section - Only show if not on success step
+                    if onboardingViewModel.currentStep != .success {
+                        progressBarSection
+                    }
                 
                 // Content based on current step
                 switch onboardingViewModel.currentStep {

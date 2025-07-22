@@ -73,15 +73,16 @@ struct OnboardingSuccessView: View {
     // MARK: - Bottom Section
     private var bottomSection: some View {
         HStack {
-            Spacer()
+            Spacer()  // Left spacer
             if showContinueButton {
-                SubmitButton(title: "begin", isLoading: onboardingViewModel.isLoading) {
+                SubmitButton(title: "home", isLoading: onboardingViewModel.isLoading) {
                     onboardingViewModel.completeOnboarding()
                 }
                 .scaleEffect(showContinueButton ? 1.0 : 0.8)
                 .opacity(showContinueButton ? 1.0 : 0.0)
                 .animation(.spring(response: 0.5, dampingFraction: 0.6), value: showContinueButton)
             }
+            Spacer()  // Right spacer (ADD THIS)
         }
         .padding(.horizontal, 30)
         .padding(.bottom, 60)
