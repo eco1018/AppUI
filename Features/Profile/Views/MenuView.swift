@@ -1,10 +1,3 @@
-//
-//  MenuView.swift
-//  AppUI
-//
-//  Created by Ella A. Sadduq on 7/9/25.
-//
-
 
 //
 //  MenuView.swift

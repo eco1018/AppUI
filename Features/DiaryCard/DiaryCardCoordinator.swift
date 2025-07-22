@@ -1,4 +1,5 @@
 //
+//
 //  DiaryCardCoordinator.swift
 //  AppUI
 //
@@ -143,63 +144,12 @@ struct DiaryCardCoordinator: View {
                 diaryFlowContent
             } else {
                 // Main diary dashboard
-                diaryDashboard
+                DiaryMainView {
+                    diaryViewModel.startDiaryCard()
+                }
             }
         }
         .animation(.easeInOut(duration: 0.3), value: diaryViewModel.showingDiaryFlow)
-    }
-    
-    // MARK: - Diary Dashboard (Main View)
-    private var diaryDashboard: some View {
-        ZStack {
-            // Background
-            LinearGradient(
-                colors: [
-                    Color(red: 0.99, green: 0.99, blue: 1.0),
-                    Color(red: 0.97, green: 0.97, blue: 0.99),
-                    Color(red: 0.95, green: 0.95, blue: 0.98)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-            
-            VStack(spacing: 40) {
-                // Header
-                VStack(spacing: 20) {
-                    Text("Daily Diary Card")
-                        .font(.system(size: 42, weight: .ultraLight))
-                        .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
-                        .tracking(-1)
-                    
-                    Text("Track your emotions, goals, and progress")
-                        .font(.system(size: 16, weight: .light))
-                        .foregroundColor(Color(red: 0.4, green: 0.4, blue: 0.45))
-                        .multilineTextAlignment(.center)
-                }
-                
-                Spacer()
-                
-                // Start Button
-                Button(action: {
-                    diaryViewModel.startDiaryCard()
-                }) {
-                    Text("Start Today's Entry")
-                        .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(red: 0.15, green: 0.15, blue: 0.2))
-                        )
-                }
-                .padding(.horizontal, 30)
-                
-                Spacer()
-            }
-            .padding(.top, 60)
-        }
     }
     
     // MARK: - Diary Flow Content

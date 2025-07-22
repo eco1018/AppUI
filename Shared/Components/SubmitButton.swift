@@ -4,14 +4,8 @@
 //
 //  Created by Ella A. Sadduq on 7/12/25.
 //
-
-
-//
-//  SubmitButton.swift
-//  AppUI
-//
 //  Reusable submit button component for completion/action flows
-//  Features loading states, icons, and consistent capsule styling
+//  Features loading states, icons, and consistent styling
 //
 
 import SwiftUI
@@ -30,37 +24,60 @@ struct SubmitButton: View {
             // Execute the passed action
             action()
         }) {
-            HStack(spacing: 10) {
+            HStack(spacing: 12) {
                 if isLoading {
                     ProgressView()
-                        .scaleEffect(0.8)
-                        .tint(Color(red: 0.2, green: 0.2, blue: 0.25))
+                        .scaleEffect(0.9)
+                        .tint(.white)
                 } else {
                     Text(title)
                         .font(.system(size: 17, weight: .medium))
-                        .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
+                        .foregroundColor(.white)
                     
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.25))
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.white.opacity(0.8))
                 }
             }
             .padding(.horizontal, 24)
-            .padding(.vertical, 14)
+            .padding(.vertical, 16)
             .background(buttonBackground)
         }
         .disabled(isLoading)
     }
     
-    // MARK: - Button Background Styling
+    // MARK: - Enhanced Button Background Styling
     private var buttonBackground: some View {
-        Capsule()
-            .fill(Color(red: 0.96, green: 0.96, blue: 0.97))
-            .overlay(
-                Capsule()
-                    .stroke(Color(red: 0.82, green: 0.82, blue: 0.85), lineWidth: 1.2)
-            )
-            .shadow(color: Color.black.opacity(0.12), radius: 12, x: 0, y: 4)
+        ZStack {
+            RoundedRectangle(cornerRadius: 14)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color(red: 0.12, green: 0.12, blue: 0.18),
+                            Color(red: 0.18, green: 0.18, blue: 0.24),
+                            Color(red: 0.15, green: 0.15, blue: 0.21)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .shadow(color: Color.black.opacity(0.15), radius: 12, x: 0, y: 6)
+                .shadow(color: Color.black.opacity(0.05), radius: 1, x: 0, y: 1)
+            
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            Color.white.opacity(0.1),
+                            Color.white.opacity(0.05),
+                            Color.clear
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1
+                )
+        }
     }
 }
 
